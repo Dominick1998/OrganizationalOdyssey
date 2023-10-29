@@ -11,7 +11,7 @@ from cryptography.fernet import Fernet
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
+#app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
 app.config['MAIL_SERVER'] = "smtp.gmail.com."
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com"
@@ -19,7 +19,12 @@ app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY")
-#app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://RyanEbsen:+$VZKM0^w)7;j@RyanEbsen.mysql.pythonanywhere-services.com/RyanEbsen$default"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
+    username="RyanEbsen",
+    password="InfiniteLoopLegends2023",
+    hostname="RyanEbsen.mysql.pythonanywhere-services.com",
+    databasename="RyanEbsen$default",
+)
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -57,7 +62,7 @@ def login():
             login_user(user)
             return redirect(url_for("home"))
         else:
-            flash(f"invalid credentials")
+            flash(f"invalid credentials", "danger")
             return redirect(url_for("login"))
     return render_template("login.html", title="Log in", form=form)
 
@@ -110,6 +115,7 @@ def confirm_account(token):
     user = User.query.filter_by(email=email).first()
     user.email_confirmed = True
     db.session.commit()
+    flash(f"Your account has been successfully registered!", "success")
     return redirect(url_for("login"))
 
 
