@@ -10,16 +10,21 @@ from cryptography.fernet import Fernet
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") #"c6d2f9789a32a64e8d12d42d2c955505"
-#app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db" #For local testing
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+#app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
 app.config['MAIL_SERVER'] = "smtp.gmail.com."
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com"
-app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD") #"pgjdzozsuadatvzw"
+app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY") #"VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ="
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://RyanEbsen:+$VZKM0^w)7;j@RyanEbsen.mysql.pythonanywhere-services.com/RyanEbsen$default"
+app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY")
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
+    username="RyanEbsen",
+    password="InfiniteLoopLegends2023",
+    hostname="RyanEbsen.mysql.pythonanywhere-services.com",
+    databasename="RyanEbsen$default",
+)
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -30,7 +35,7 @@ login_manager = LoginManager(app)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String, unique=True, nullable=False)
+    email = db.Column(db.String(60), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     admin = db.Column(db.Boolean, nullable=False, default=False)
     email_confirmed = db.Column(db.Boolean, nullable=False, default=False)
@@ -57,7 +62,7 @@ def login():
             login_user(user)
             return redirect(url_for("home"))
         else:
-            flash(f"invalid credentials")
+            flash(f"invalid credentials", "danger")
             return redirect(url_for("login"))
     return render_template("login.html", title="Log in", form=form)
 
@@ -110,6 +115,7 @@ def confirm_account(token):
     user = User.query.filter_by(email=email).first()
     user.email_confirmed = True
     db.session.commit()
+    flash(f"Your account has been successfully registered!", "success")
     return redirect(url_for("login"))
 
 
