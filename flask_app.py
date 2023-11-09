@@ -10,21 +10,21 @@ from cryptography.fernet import Fernet
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
-#app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
+app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505" #os.environ.get("SECRET_KEY")
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
 app.config['MAIL_SERVER'] = "smtp.gmail.com."
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com"
-app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
+app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw" #os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY")
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
-    username="RyanEbsen",
-    password="InfiniteLoopLegends2023",
-    hostname="RyanEbsen.mysql.pythonanywhere-services.com",
-    databasename="RyanEbsen$default",
-)
+app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ=" #os.environ.get("FERNET_KEY")
+# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
+#     username="RyanEbsen",
+#     password="InfiniteLoopLegends2023",
+#     hostname="RyanEbsen.mysql.pythonanywhere-services.com",
+#     databasename="RyanEbsen$default",
+# )
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -33,12 +33,32 @@ fernet = Fernet(app.config["FERNET_KEY"])
 login_manager = LoginManager(app)
 
 
+employer_relation = db.Table("employer_relation",
+                             db.Column('parent_id', db.Integer, db.ForeignKey('employer.id')),
+                             db.Column('child_id', db.Integer, db.ForeignKey('employer.id'))
+                             )
+
+
 class User(UserMixin, db.Model):
+    __tablename__ = "user"
+
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(60), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     admin = db.Column(db.Boolean, nullable=False, default=False)
     email_confirmed = db.Column(db.Boolean, nullable=False, default=False)
+
+
+class Employer(db.Model):
+    __tablename__ = "employer"
+
+    id = db.Column(db.Integer, primary_key=True)
+    employer_name = db.Column(db.String(60), nullable=False)
+    headquarters_address = db.Column(db.String(60), nullable=False)
+    child_employers = db.relationship('Employer', secondary=employer_relation,
+                                      primaryjoin=(employer_relation.c.parent_id == id),
+                                      secondaryjoin=(employer_relation.c.child_id == id),
+                                      backref='parent_employers')
 
 
 @login_manager.user_loader
