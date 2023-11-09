@@ -38,6 +38,11 @@ employer_relation = db.Table("employer_relation",
                              db.Column('child_id', db.Integer, db.ForeignKey('employer.id'))
                              )
 
+employee_relation = db.Table("employee_relation",
+                             db.Column('parent_id', db.Integer, db.ForeignKey('employer.id')),
+                             db.Column('child_id', db.Integer, db.ForeignKey('employer.id'))
+                             )
+
 
 class User(UserMixin, db.Model):
     __tablename__ = "user"
@@ -55,10 +60,22 @@ class Employer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     employer_name = db.Column(db.String(60), nullable=False)
     headquarters_address = db.Column(db.String(60), nullable=False)
-    child_employers = db.relationship('Employer', secondary=employer_relation,
+    child_employers = db.relationship("Employer", secondary=employer_relation,
                                       primaryjoin=(employer_relation.c.parent_id == id),
                                       secondaryjoin=(employer_relation.c.child_id == id),
-                                      backref='parent_employers')
+                                      backref="parent_employers")
+    child_employees = db.relationship("Employee", secondary=employee_relation,
+                                      primaryjoin=(employee_relation.c.parent_id == id),
+                                      secondaryjoin=(employee_relation.c.child_id == id),
+                                      backref="employers")
+
+
+class Employee(db.Model):
+    __tablename__ = "employee"
+
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(60), nullable=False)
+    last_name = db.Column(db.String(60), nullable=False)
 
 
 @login_manager.user_loader
