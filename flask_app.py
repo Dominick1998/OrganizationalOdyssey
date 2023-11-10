@@ -19,7 +19,12 @@ app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY")
-#app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://RyanEbsen:+$VZKM0^w)7;j@RyanEbsen.mysql.pythonanywhere-services.com/RyanEbsen$default"
+# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
+#     username="RyanEbsen",
+#     password="InfiniteLoopLegends2023",
+#     hostname="RyanEbsen.mysql.pythonanywhere-services.com",
+#     databasename="RyanEbsen$default",
+# )
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -28,12 +33,49 @@ fernet = Fernet(app.config["FERNET_KEY"])
 login_manager = LoginManager(app)
 
 
+employer_relation = db.Table("employer_relation",
+                             db.Column('parent_id', db.Integer, db.ForeignKey('employer.id')),
+                             db.Column('child_id', db.Integer, db.ForeignKey('employer.id'))
+                             )
+
+employee_relation = db.Table("employee_relation",
+                             db.Column('parent_id', db.Integer, db.ForeignKey('employer.id')),
+                             db.Column('child_id', db.Integer, db.ForeignKey('employer.id'))
+                             )
+
+
 class User(UserMixin, db.Model):
+    __tablename__ = "user"
+
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String, unique=True, nullable=False)
+    email = db.Column(db.String(60), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     admin = db.Column(db.Boolean, nullable=False, default=False)
     email_confirmed = db.Column(db.Boolean, nullable=False, default=False)
+
+
+class Employer(db.Model):
+    __tablename__ = "employer"
+
+    id = db.Column(db.Integer, primary_key=True)
+    employer_name = db.Column(db.String(60), nullable=False)
+    headquarters_address = db.Column(db.String(60), nullable=False)
+    child_employers = db.relationship("Employer", secondary=employer_relation,
+                                      primaryjoin=(employer_relation.c.parent_id == id),
+                                      secondaryjoin=(employer_relation.c.child_id == id),
+                                      backref="parent_employers")
+    child_employees = db.relationship("Employee", secondary=employee_relation,
+                                      primaryjoin=(employee_relation.c.parent_id == id),
+                                      secondaryjoin=(employee_relation.c.child_id == id),
+                                      backref="employers")
+
+
+class Employee(db.Model):
+    __tablename__ = "employee"
+
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(60), nullable=False)
+    last_name = db.Column(db.String(60), nullable=False)
 
 
 @login_manager.user_loader
@@ -57,7 +99,7 @@ def login():
             login_user(user)
             return redirect(url_for("home"))
         else:
-            flash(f"invalid credentials")
+            flash(f"invalid credentials", "danger")
             return redirect(url_for("login"))
     return render_template("login.html", title="Log in", form=form)
 
@@ -110,6 +152,7 @@ def confirm_account(token):
     user = User.query.filter_by(email=email).first()
     user.email_confirmed = True
     db.session.commit()
+    flash(f"Your account has been successfully registered!", "success")
     return redirect(url_for("login"))
 
 
