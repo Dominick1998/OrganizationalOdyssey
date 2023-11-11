@@ -10,21 +10,18 @@ from cryptography.fernet import Fernet
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505"
+
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
 app.config['MAIL_SERVER'] = "smtp.gmail.com."
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com"
-app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ="
-# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
-#     username="RyanEbsen",
-#     password="InfiniteLoopLegends2023",
-#     hostname="RyanEbsen.mysql.pythonanywhere-services.com",
-#     databasename="RyanEbsen$default",
-# )
+app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY")
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -64,10 +61,10 @@ class Employer(db.Model):
                                       primaryjoin=(employer_relation.c.parent_id == id),
                                       secondaryjoin=(employer_relation.c.child_id == id),
                                       backref="parent_employers")
-    child_employees = db.relationship("Employee", secondary=employee_relation,
-                                      primaryjoin=(employee_relation.c.parent_id == id),
-                                      secondaryjoin=(employee_relation.c.child_id == id),
-                                      backref="employers")
+    employees = db.relationship("Employee", secondary=employee_relation,
+                                primaryjoin=(employee_relation.c.parent_id == id),
+                                secondaryjoin=(employee_relation.c.child_id == id),
+                                backref="employers")
 
 
 class Employee(db.Model):
