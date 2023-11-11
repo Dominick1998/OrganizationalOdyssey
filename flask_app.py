@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template, url_for, redirect, request, flash
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from forms import RegistrationForm, LoginForm
+from forms import RegistrationForm, LoginForm, SearchForm
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
@@ -22,7 +22,6 @@ app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY")
-
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
@@ -140,7 +139,8 @@ def register():
 @app.route("/home")
 @login_required
 def home():  # put application's code here
-    return render_template("home.html")
+    form = SearchForm()
+    return render_template("home.html", form=form)
 
 
 @app.route("/confirm/<token>")
@@ -152,6 +152,15 @@ def confirm_account(token):
     flash(f"Your account has been successfully registered!", "success")
     return redirect(url_for("login"))
 
+
+@app.route("/visualization", methods=["GET", "POST"])
+@login_required
+def visualization():
+    form = SearchForm()
+    if request.method == "POST":
+        employer = Employer.query.filter_by(employer_name=form.search.data).first()
+        print(employer.employer_name)
+    return render_template("visualization.html", employer=employer)
 
 if __name__ == "__main__":
     app.run()
