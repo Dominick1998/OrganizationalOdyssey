@@ -1,19 +1,38 @@
 anychart.onDocumentReady(function () {
-  console.log("test");
-  // create an instance of a pie chart
-  var chart = anychart.pie();
-  // set the data
-    chart.data([
-    ["Chocolate", 5],
-    ["Rhubarb compote", 2],
-    ["Crêpes Suzette", 2],
-    ["American blueberry", 2],
-    ["Buttermilk", 1]
-  ]);
-  // set chart title
-  chart.title("Top 5 pancake fillings");
-  // set the container element
+  // create data
+  var data = {
+    nodes: [
+      {id: "Richard"},
+      {id: "Larry"},
+      {id: "Marta"},
+      {id: "Jane"},
+      {id: "Norma"},
+      {id: "Frank"},
+      {id: "Brett"}
+    ],
+    edges: [
+      {from: "Richard", to: "Larry"},
+      {from: "Richard", to: "Marta"},
+      {from: "Larry",   to: "Marta"},
+      {from: "Marta",   to: "Jane"},
+      {from: "Jane",    to: "Norma"},
+      {from: "Jane",    to: "Frank"},
+      {from: "Jane",    to: "Brett"},
+      {from: "Brett",   to: "Frank"}
+    ]
+  };
+
+  // create a chart and set the data
+  var chart = anychart.graph(data);
+
+  // set the container id
   chart.container("container");
-  // initiate chart display
+
+  // initiate drawing the chart
   chart.draw();
 });
+
+// set the layout type
+function layoutType(type) {
+  chart.layout().type(type);
+}
