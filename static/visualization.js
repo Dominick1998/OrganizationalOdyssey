@@ -1,38 +1,23 @@
-anychart.onDocumentReady(function () {
-  // create data
-  var data = {
-    nodes: [
-      {id: "Richard"},
-      {id: "Larry"},
-      {id: "Marta"},
-      {id: "Jane"},
-      {id: "Norma"},
-      {id: "Frank"},
-      {id: "Brett"}
-    ],
-    edges: [
-      {from: "Richard", to: "Larry"},
-      {from: "Richard", to: "Marta"},
-      {from: "Larry",   to: "Marta"},
-      {from: "Marta",   to: "Jane"},
-      {from: "Jane",    to: "Norma"},
-      {from: "Jane",    to: "Frank"},
-      {from: "Jane",    to: "Brett"},
-      {from: "Brett",   to: "Frank"}
-    ]
-  };
+function createChart(employerData)
+{
+    anychart.onDocumentReady(function () {
+    // create data
+    var data = employerData;
 
-  // create a chart and set the data
-  var chart = anychart.graph(data);
+    // create a chart and set the data
+    var chart = anychart.graph(data);
 
-  // set the container id
-  chart.container("container");
+    chart.edges().arrows().enabled(true);
 
-  // initiate drawing the chart
-  chart.draw();
-});
+    // set the container id
+    chart.container("container");
 
-// set the layout type
-function layoutType(type) {
-  chart.layout().type(type);
+    // initiate drawing the chart
+    chart.draw();
+    });
+
+    // set the layout type
+    function layoutType(type) {
+      chart.layout().type(type);
+    }
 }

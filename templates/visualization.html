@@ -15,8 +15,8 @@
     {{ employer.parent_employers }}
     <br>
     {{ employer.child_employers }}
-    <div id="container" style="width: 100%; height: 100%;"></div>
-    <script>alertEmployer()</script>
+    <div id="container" style="width: 50%; height: 100%;border-style:solid;"></div>
+    <script>createChart({{data|tojson}})</script>
     </body>
 
 {% endblock content %}

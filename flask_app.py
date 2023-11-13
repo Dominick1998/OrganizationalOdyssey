@@ -160,7 +160,30 @@ def visualization():
     if request.method == "POST":
         employer = Employer.query.filter_by(employer_name=form.search.data).first()
         print(employer.employer_name)
-    return render_template("visualization.html", employer=employer)
+        #create data
+        employerData = {
+            "nodes": [
+                {"id": "Jared"},
+                {"id": "Larry"},
+                {"id": "Marta"},
+                {"id": "Jane"},
+                {"id": "Norma"},
+                {"id": "Frank"},
+                {"id": "Brett"}
+            ],
+            "edges": [
+                {"from": "Jared", "to": "Larry"},
+                {"from": "Jared", "to": "Marta"},
+                {"from": "Larry", "to": "Marta"},
+                {"from": "Marta", "to": "Jane"},
+                {"from": "Jane", "to": "Norma"},
+                {"from": "Jane", "to": "Frank"},
+                {"from": "Jane", "to": "Brett"},
+                {"from": "Brett", "to": "Frank"}
+            ]
+        }
+        return render_template("visualization.html", employer=employer, data=employerData)
+
 
 if __name__ == "__main__":
     app.run()
