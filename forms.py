@@ -19,3 +19,13 @@ class LoginForm(FlaskForm):
 class SearchForm(FlaskForm):
     search = StringField("Search", validators=[DataRequired()])
     submit = SubmitField("Search")
+
+class NewEmployerForm(FlaskForm):
+    employer_name = StringField("Employer Name", validators=[DataRequired()])
+    headquarters_address = StringField('Headquarters Address', validators=[DataRequired()])
+    submit = SubmitField('Add Employer')
+
+class RelationForm(FlaskForm):
+    parent_name = StringField("Parent Name", validators=[DataRequired()])
+    child_name = StringField('Child Name', validators=[DataRequired()])
+    submit = SubmitField('Add Relation')

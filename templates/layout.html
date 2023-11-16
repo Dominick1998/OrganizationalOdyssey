@@ -19,15 +19,12 @@
                 {% if title != "Log in" %}
                     <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                         <li><a href="{{ url_for("home") }}" class="nav-link px-2 text-white">Home</a></li>
-                        <li><a href="#" class="nav-link px-2 text-white">Features</a></li>
+                        <li><a href="{{ url_for("visualization") }}" class="nav-link px-2 text-white">Visualization</a></li>
                         <li><a href="#" class="nav-link px-2 text-white">About</a></li>
                     </ul>
                 {% endif %}
                 {% if title == "Log in" %}
-                    <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-
-                    </ul>
-
+                    <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0"></ul> <!-- #Empty Block so that title stays aligned -->
                 {% endif %}
 
                 <div class="col-12 col-lg-auto me-lg-auto mb-2 justify-content-center">
