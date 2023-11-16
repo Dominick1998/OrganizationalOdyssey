@@ -164,33 +164,31 @@ def visualization():
             return redirect(url_for("home"))
         print(employer.employer_name)
         data = {"nodes": [], "edges": []}
-        visited_nodes = []
-        traverse_tree(employer, data, visited_nodes)
+        traverse_tree(employer, data)
 
         #create data
         return render_template("visualization.html", employer=employer, data=data)
 
 
-def traverse_tree(root_employer, data, visited_nodes):
+def traverse_tree(root_employer, data):
     data.get("nodes").append({"id": root_employer.id, "name": root_employer.employer_name,
                               "address": root_employer.headquarters_address})
-    visited_nodes.append(root_employer)
 
     for child_employer in root_employer.child_employers:
-        if child_employer not in visited_nodes:
+        if child_employer not in data.get("nodes"):
             data.get("edges").append({"from": root_employer.id,
                                       "to": child_employer.id,
                                       "from_name": root_employer.employer_name,
                                       "to_name": child_employer.employer_name})
-            traverse_tree(child_employer, data, visited_nodes)
+            traverse_tree(child_employer, data)
 
     for parent_employer in root_employer.parent_employers:
-        if parent_employer not in visited_nodes:
+        if parent_employer not in data.get("nodes"):
             data.get("edges").append({"from": parent_employer.id,
                                       "to": root_employer.id,
                                       "from_name": parent_employer.employer_name,
                                       "to_name": root_employer.employer_name})
-            traverse_tree(parent_employer, data, visited_nodes)
+            traverse_tree(parent_employer, data)
 
 
 if __name__ == "__main__":
