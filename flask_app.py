@@ -159,30 +159,33 @@ def visualization():
     form = SearchForm()
     if request.method == "POST":
         employer = Employer.query.filter_by(employer_name=form.search.data).first()
+        if not employer:
+            flash(f"{form.search.data} not found", "danger")
+            return redirect(url_for("home"))
         print(employer.employer_name)
+        nodes, edges = [], []
+        traverse_children_employer(employer, nodes, edges)
+        traverse_parent_employer(employer, nodes, edges)
+
+        data = {"nodes": nodes, "edges": edges}
+
         #create data
-        employerData = {
-            "nodes": [
-                {"id": "Jared"},
-                {"id": "Larry"},
-                {"id": "Marta"},
-                {"id": "Jane"},
-                {"id": "Norma"},
-                {"id": "Frank"},
-                {"id": "Brett"}
-            ],
-            "edges": [
-                {"from": "Jared", "to": "Larry"},
-                {"from": "Jared", "to": "Marta"},
-                {"from": "Larry", "to": "Marta"},
-                {"from": "Marta", "to": "Jane"},
-                {"from": "Jane", "to": "Norma"},
-                {"from": "Jane", "to": "Frank"},
-                {"from": "Jane", "to": "Brett"},
-                {"from": "Brett", "to": "Frank"}
-            ]
-        }
-        return render_template("visualization.html", employer=employer, data=employerData)
+        return render_template("visualization.html", employer=employer, data=data)
+
+
+def traverse_children_employer(root_employer, nodes, edges):
+    nodes.append({"id": root_employer.employer_name})
+
+    for child_employer in root_employer.child_employers:
+        edges.append({"from": root_employer.employer_name, "to": child_employer.employer_name})
+        traverse_children_employer(child_employer, nodes, edges)
+
+
+def traverse_parent_employer(root_employer, nodes, edges):
+    nodes.append({"id": root_employer.employer_name})
+    for parent_employer in root_employer.parent_employers:
+        edges.append({"from": parent_employer.employer_name, "to": root_employer.employer_name})
+        traverse_parent_employer(parent_employer, nodes, edges)
 
 
 if __name__ == "__main__":

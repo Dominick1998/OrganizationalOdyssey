@@ -11,10 +11,6 @@
     {{ employer.employer_name }}
     <br>
     {{ employer.headquarters_address }}
-    <br>
-    {{ employer.parent_employers }}
-    <br>
-    {{ employer.child_employers }}
     <div id="container" style="width: 50%; height: 100%;border-style:solid;"></div>
     <script>createChart({{data|tojson}})</script>
     </body>
