@@ -35,6 +35,14 @@
         {{ new_employer_form.headquarters_address }}
         {{ new_employer_form.submit }}
       </form>
+      <form method="POST" action="{{ url_for('add_relation') }}">
+        {{ relation_form.hidden_tag() }}
+        {{ relation_form.parent_name.label }}
+        {{ relation_form.parent_name }}
+        {{ relation_form.child_name.label }}
+        {{ relation_form.child_name }}
+        {{ relation_form.submit }}
+      </form>
     </div>
     {% endif %}
 {% endblock content %}

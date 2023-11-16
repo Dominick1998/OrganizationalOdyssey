@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template, url_for, redirect, request, flash
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm
+from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, RelationForm
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
@@ -11,7 +11,7 @@ from cryptography.fernet import Fernet
 app = Flask(__name__)
 
 
-app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505"#os.environ.get("SECRET_KEY")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
 app.config['MAIL_SERVER'] = "smtp.gmail.com."
 app.config['MAIL_PORT'] = 465
@@ -141,7 +141,9 @@ def register():
 def home():  # put application's code here
     form = SearchForm()
     employer_form = NewEmployerForm()
-    return render_template("home.html", form=form, new_employer_form=employer_form, current_user=current_user)
+    relation_form = RelationForm()
+    return render_template("home.html", form=form, new_employer_form=employer_form,
+                           relation_form=relation_form, current_user=current_user)
 
 
 @app.route("/confirm/<token>")
@@ -226,6 +228,30 @@ def add_employer():
         db.session.commit()
 
         flash("Employer added successfully!", "success")
+
+    return redirect(url_for("home"))
+
+@app.route("/add_relation", methods=["POST"])
+@login_required
+def add_relation():
+    if not current_user.admin:
+        return
+
+    form = RelationForm()
+
+    if form.validate_on_submit():
+        parent_employer = Employer.query.filter_by(employer_name=form.parent_name.data).first()
+        child_employer = Employer.query.filter_by(employer_name=form.child_name.data).first()
+
+        if not parent_employer or not child_employer:
+            flash("Child or Parent's name is incorrect", "danger")
+            return redirect(url_for("home"))
+
+
+        parent_employer.child_employers.append(child_employer)
+        db.session.commit()
+
+        flash("Relation added successfully!", "success")
 
     return redirect(url_for("home"))
 
