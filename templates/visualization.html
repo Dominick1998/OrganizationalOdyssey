@@ -8,10 +8,12 @@
 
     <body>
     <h1>Visualization</h1>
+    <div class="d-flex justify-content-center" style="font-size:1.6em;">
     {{ employer.employer_name }}
-    <br>
-    {{ employer.headquarters_address }}
-    <div id="container" style="width: 50%; height: 100%;border-style:solid;"></div>
+    </div>
+    <div class="d-flex justify-content-center" style="height:150%;">
+    <div id="container" style="width: 50%;border-style:solid;"></div>
+    </div>
     <script>createChart({{data|tojson}})</script>
     </body>
 

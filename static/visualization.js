@@ -9,6 +9,18 @@ function createChart(employerData)
 
     chart.edges().arrows().enabled(true);
 
+    // enable labels of nodes
+    chart.nodes().labels().enabled(true);
+
+    // configure labels of nodes
+    chart.nodes().labels().format("{%name}");
+    chart.nodes().labels().fontSize(12);
+    chart.nodes().labels().fontWeight(600);
+
+    chart.tooltip().useHtml(true);
+    chart.nodes().tooltip().format("Name: {%name} </br> Address: {%address}");
+    chart.edges().tooltip().format("From: {%from_name} </br> To: {%to_name}")
+
     // set the container id
     chart.container("container");
 
