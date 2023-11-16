@@ -5,7 +5,6 @@
         {{ form.hidden_tag() }}
         <legend class="border-bottom mb-4">Search</legend>
         <div class="form-group">
-            {{ form.search.label(class="form-control-label") }}
             {% if form.search.errors %}
                 {{ form.search(class="form-control form-control-lg is-invalid") }}
                 <div class="invalid-feedback">

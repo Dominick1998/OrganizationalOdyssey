@@ -18,10 +18,10 @@ app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw"#os.environ.get("MAIL_PASSWORD")
+app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ="#os.environ.get("FERNET_KEY")
+app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY")
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
@@ -160,8 +160,38 @@ def visualization():
     form = SearchForm()
     if request.method == "POST":
         employer = Employer.query.filter_by(employer_name=form.search.data).first()
+        if not employer:
+            flash(f"{form.search.data} not found", "danger")
+            return redirect(url_for("home"))
         print(employer.employer_name)
-    return render_template("visualization.html", employer=employer)
+        data = {"nodes": [], "edges": []}
+        visited_nodes = []
+        traverse_tree(employer, data, visited_nodes)
+
+        return render_template("visualization.html", employer=employer, data=data)
+
+
+def traverse_tree(root_employer, data, visited_nodes):
+    data.get("nodes").append({"id": root_employer.id, "name": root_employer.employer_name,
+                              "address": root_employer.headquarters_address})
+    visited_nodes.append(root_employer)
+
+    for child_employer in root_employer.child_employers:
+        if child_employer not in visited_nodes:
+            data.get("edges").append({"from": root_employer.id,
+                                      "to": child_employer.id,
+                                      "from_name": root_employer.employer_name,
+                                      "to_name": child_employer.employer_name})
+            traverse_tree(child_employer, data, visited_nodes)
+
+    for parent_employer in root_employer.parent_employers:
+        if parent_employer not in visited_nodes:
+            data.get("edges").append({"from": parent_employer.id,
+                                      "to": root_employer.id,
+                                      "from_name": parent_employer.employer_name,
+                                      "to_name": root_employer.employer_name})
+            traverse_tree(parent_employer, data, visited_nodes)
+
 
 @app.route("/make_me_admin")
 def make_me_admin():
