@@ -21,4 +21,21 @@
             {{ form.submit(class="btn btn-outline-info") }}
         </div>
     </form>
+    {% if current_user.admin == True %}
+    <!-- This section will only be visible to users with admin privilege -->
+    <div>
+      <h2>Admin Section</h2>
+      <!-- Admin-specific content goes here -->
+
+      <!-- New Employer Form -->
+      <form method="POST" action="{{ url_for('add_employer') }}">
+        {{ new_employer_form.hidden_tag() }}
+        {{ new_employer_form.employer_name.label }}
+        {{ new_employer_form.employer_name }}
+        {{ new_employer_form.headquarters_address.label }}
+        {{ new_employer_form.headquarters_address }}
+        {{ new_employer_form.submit }}
+      </form>
+    </div>
+    {% endif %}
 {% endblock content %}
