@@ -22,6 +22,13 @@ app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY")
+# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
+#     username="RyanEbsen",
+#     password="InfiniteLoopLegends2023",
+#     hostname="RyanEbsen.mysql.pythonanywhere-services.com",
+#     databasename="RyanEbsen$default"
+# )
+
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
@@ -206,12 +213,14 @@ def make_me_admin():
     db.session.commit()
     return redirect(url_for("home"))
 
+
 @app.route("/make_me_not_admin")
 def make_me_not_admin():
     user = User.query.filter_by(email=current_user.email).first()
     user.admin = False
     db.session.commit()
     return redirect(url_for("home"))
+
 
 @app.route("/add_employer", methods=["POST"])
 @login_required
@@ -220,20 +229,17 @@ def add_employer():
         return
 
     form = NewEmployerForm()
-
     if form.validate_on_submit():
         new_employer = Employer(
             employer_name=form.employer_name.data,
             headquarters_address=form.headquarters_address.data
             # Add other fields as needed
         )
-
         db.session.add(new_employer)
         db.session.commit()
-
         flash("Employer added successfully!", "success")
-
     return redirect(url_for("home"))
+
 
 @app.route("/add_relation", methods=["POST"])
 @login_required
@@ -242,22 +248,19 @@ def add_relation():
         return
 
     form = RelationForm()
-
     if form.validate_on_submit():
         parent_employer = Employer.query.filter_by(employer_name=form.parent_name.data).first()
         child_employer = Employer.query.filter_by(employer_name=form.child_name.data).first()
-
         if not parent_employer or not child_employer:
             flash("Child or Parent's name is incorrect", "danger")
             return redirect(url_for("home"))
 
-
         parent_employer.child_employers.append(child_employer)
         db.session.commit()
-
         flash("Relation added successfully!", "success")
 
     return redirect(url_for("home"))
+
 
 if __name__ == "__main__":
     app.run()
