@@ -3,25 +3,25 @@ import os
 from flask import Flask, render_template, url_for, redirect, request, flash
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from forms import RegistrationForm, LoginForm, SearchForm
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
 
 app = Flask(__name__)
 
 
-app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505"#os.environ.get("SECRET_KEY")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
 app.config['MAIL_SERVER'] = "smtp.gmail.com."
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw"#os.environ.get("MAIL_PASSWORD")
+app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ="#os.environ.get("FERNET_KEY")
+app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY")
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
@@ -140,8 +140,7 @@ def register():
 @login_required
 def home():  # put application's code here
     form = SearchForm()
-    employer_form = NewEmployerForm()
-    return render_template("home.html", form=form, new_employer_form=employer_form, current_user=current_user)
+    return render_template("home.html", form=form)
 
 
 @app.route("/confirm/<token>")
@@ -162,42 +161,6 @@ def visualization():
         employer = Employer.query.filter_by(employer_name=form.search.data).first()
         print(employer.employer_name)
     return render_template("visualization.html", employer=employer)
-
-@app.route("/make_me_admin")
-def make_me_admin():
-    user = User.query.filter_by(email=current_user.email).first()
-    user.admin = True
-    db.session.commit()
-    return redirect(url_for("home"))
-
-@app.route("/make_me_not_admin")
-def make_me_not_admin():
-    user = User.query.filter_by(email=current_user.email).first()
-    user.admin = False
-    db.session.commit()
-    return redirect(url_for("home"))
-
-@app.route("/add_employer", methods=["POST"])
-@login_required
-def add_employer():
-    if not current_user.admin:
-        return
-
-    form = NewEmployerForm()
-
-    if form.validate_on_submit():
-        new_employer = Employer(
-            employer_name=form.employer_name.data,
-            headquarters_address=form.headquarters_address.data
-            # Add other fields as needed
-        )
-
-        db.session.add(new_employer)
-        db.session.commit()
-
-        flash("Employer added successfully!", "success")
-
-    return redirect(url_for("home"))
 
 if __name__ == "__main__":
     app.run()
