@@ -22,6 +22,13 @@ app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY")
+# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
+#     username="RyanEbsen",
+#     password="InfiniteLoopLegends2023",
+#     hostname="RyanEbsen.mysql.pythonanywhere-services.com",
+#     databasename="RyanEbsen$default"
+# )
+
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
