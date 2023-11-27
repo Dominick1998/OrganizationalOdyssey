@@ -15,27 +15,31 @@
 <body>
     <header class="p-3 text-bg-dark">
         <div class="container">
-            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-                {% if title != "Log in" %}
-                    <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+            <div class="row align-items-center justify-content-center">
+                {% if title != "Log in" and title != "Registration"%}
+                    <ul class="nav col-md-4">
                         <li><a href="{{ url_for("home") }}" class="nav-link px-2 text-white">Home</a></li>
                         <li><a href="{{ url_for("visualization") }}" class="nav-link px-2 text-white">Visualization</a></li>
-                        <li><a href="#" class="nav-link px-2 text-white">About</a></li>
+                        {% if current_user.admin == True %}
+                            <li><a href="{{ url_for("admin") }}" class="nav-link px-2 text-white">Admin</a></li>
+                        {%endif%}
                     </ul>
                 {% endif %}
-                {% if title == "Log in" %}
-                    <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0"></ul> <!-- #Empty Block so that title stays aligned -->
+                {% if title == "Log in" or title == "Registration"%}
+                    <ul class="col-md-4"></ul> <!-- #Empty Block so that title stays aligned -->
                 {% endif %}
 
-                <div class="col-12 col-lg-auto me-lg-auto mb-2 justify-content-center">
+                <div class="col-md-4 justify-content-center"  align="center">
                     <a href="{{ url_for("home") }}" class="nav-link px-2 text-white">Organizational Odyssey</a>
                 </div>
 
-                <div class="text-end">
-                    {% if title != "Log in" and title != "Registration" %}
-                        <a href="{{ url_for("logout") }}" type="button" class="btn btn-outline-light me-2">Logout</a>
-                    {% else %}
+                <div class="text-end col-md-4">
+                    {% if title == "Registration" %}
+                        <a href="{{ url_for("login") }}" type="button" class="btn btn-warning">Sign-in</a>
+                    {% elif title == "Log in" %}
                         <a href="{{ url_for("register") }}" type="button" class="btn btn-warning">Sign-up</a>
+                    {% else %}
+                        <a href="{{ url_for("logout") }}" type="button" class="btn btn-outline-light me-2">Logout</a>
                     {% endif %}
                 </div>
             </div>

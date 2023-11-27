@@ -7,14 +7,32 @@
     </head>
 
     <body>
-    <h1>Visualization</h1>
-    <div class="d-flex justify-content-center" style="font-size:1.6em;">
-    {{ employer.employer_name }}
+    <h1 class="border-bottom">Visualization</h1>
+
+    <div class="row">
+
+        <div class="col-lg-4">
+            <div class="justify-content-left" style="font-size:1.4em;overflow-y: auto;height:32em">
+                <div class="pb-5">
+                Employer: {{ employer.employer_name }} </br>
+                Address: {{ employer.headquarters_address }} </br>
+                Start Date: {{ employer.start_date.strftime("%Y-%m-%d") }} </br>
+                End Date: {{ end_time }} </br>
+                </div>
+                {% if employer.description != "" %}
+                Description: {{ employer.description }}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-center" style="height:45em">
+            <div id="chart_container" class="w-100 p-3" style="background-color: #eee;"></div>
+            </div>
+            <script>createChart({{data|tojson}})</script>
+        </div>
+
     </div>
-    <div class="d-flex justify-content-center" style="height:150%;">
-    <div id="container" style="width: 50%;border-style:solid;"></div>
-    </div>
-    <script>createChart({{data|tojson}})</script>
     </body>
 
 {% endblock content %}

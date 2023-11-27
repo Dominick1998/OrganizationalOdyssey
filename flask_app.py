@@ -11,17 +11,24 @@ from cryptography.fernet import Fernet
 app = Flask(__name__)
 
 
-app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505" #os.environ.get("SECRET_KEY")
+app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505"#os.environ.get("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
 app.config['MAIL_SERVER'] = "smtp.gmail.com."
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw" #os.environ.get("MAIL_PASSWORD")
+app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw"#os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ=" #os.environ.get("FERNET_KEY")
+app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ="#os.environ.get("FERNET_KEY")
+# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
+#     username="RyanEbsen",
+#     password="InfiniteLoopLegends2023",
+#     hostname="RyanEbsen.mysql.pythonanywhere-services.com",
+#     databasename="RyanEbsen$default"
+# )
+
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
@@ -54,8 +61,11 @@ class Employer(db.Model):
     __tablename__ = "employer"
 
     id = db.Column(db.Integer, primary_key=True)
-    employer_name = db.Column(db.String(60), nullable=False)
+    employer_name = db.Column(db.String(60), nullable=False, unique=True)
     headquarters_address = db.Column(db.String(60), nullable=False)
+    description = db.Column(db.String(60))
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime)
     child_employers = db.relationship("Employer", secondary=employer_relation,
                                       primaryjoin=(employer_relation.c.parent_id == id),
                                       secondaryjoin=(employer_relation.c.child_id == id),
@@ -140,10 +150,7 @@ def register():
 @login_required
 def home():  # put application's code here
     form = SearchForm()
-    employer_form = NewEmployerForm()
-    relation_form = RelationForm()
-    return render_template("home.html", form=form, new_employer_form=employer_form,
-                           relation_form=relation_form, current_user=current_user)
+    return render_template("home.html", form=form, current_user=current_user)
 
 
 @app.route("/confirm/<token>")
@@ -169,19 +176,49 @@ def visualization():
         data = {"nodes": [], "edges": []}
         visited_nodes = []
 
-        data.get("nodes").append({"id": employer.id, "name": employer.employer_name,
+        end_time = employer.end_date
+        end_time = end_time.strftime("%Y-%m-%d") if end_time is not None else "Active Company"
+
+        description = employer.description if employer.description is not "" else "No Description"
+        description = (description[:100] + "...") if len(description) > 100 else description
+        data.get("nodes").append({"id": employer.id,
+                                  "name": employer.employer_name,
                                   "address": employer.headquarters_address,
+                                  "start_date": employer.start_date.strftime("%Y-%m-%d"),
+                                  "end_date": end_time,
+                                  "description": description,
                                   "fill": "purple", "shape": "diamond"})
         traverse_tree(employer, data, visited_nodes)
 
-        return render_template("visualization.html", employer=employer, data=data)
+        return render_template("visualization.html", employer=employer, data=data, end_time=end_time)
+
+
+@app.route("/admin")
+@login_required
+def admin():
+    if not current_user.admin:
+        flash("Unauthorized Access", "danger")
+        return redirect(url_for("home"))
+    employer_form = NewEmployerForm()
+    relation_form = RelationForm()
+    return render_template("admin.html", new_employer_form=employer_form,
+                           relation_form=relation_form)
 
 
 def traverse_tree(root_employer, data, visited_nodes):
     if root_employer in visited_nodes:
         return
-    data.get("nodes").append({"id": root_employer.id, "name": root_employer.employer_name,
-                              "address": root_employer.headquarters_address})
+    end_time = root_employer.end_date
+    end_time = end_time.strftime("%Y-%m-%d") if end_time is not None else "Active Company"
+
+    description = root_employer.description if root_employer.description is not "" else "No Description"
+
+    data.get("nodes").append({"id": root_employer.id,
+                              "name": root_employer.employer_name,
+                              "address": root_employer.headquarters_address,
+                              "start_date": root_employer.start_date.strftime("%Y-%m-%d"),
+                              "end_date": end_time,
+                              "description": description})
     visited_nodes.append(root_employer)
 
     for child_employer in root_employer.child_employers:
@@ -206,12 +243,14 @@ def make_me_admin():
     db.session.commit()
     return redirect(url_for("home"))
 
+
 @app.route("/make_me_not_admin")
 def make_me_not_admin():
     user = User.query.filter_by(email=current_user.email).first()
     user.admin = False
     db.session.commit()
     return redirect(url_for("home"))
+
 
 @app.route("/add_employer", methods=["POST"])
 @login_required
@@ -220,20 +259,24 @@ def add_employer():
         return
 
     form = NewEmployerForm()
-
     if form.validate_on_submit():
+        valid_employer = Employer.query.filter_by(employer_name=form.employer_name.data).first()
+        if valid_employer:
+            flash(f"Employer with name {valid_employer.employer_name} already exists", "danger")
+            return redirect(url_for("admin"))
+
         new_employer = Employer(
             employer_name=form.employer_name.data,
-            headquarters_address=form.headquarters_address.data
-            # Add other fields as needed
+            headquarters_address=form.headquarters_address.data,
+            description=form.description.data,
+            start_date=form.start_date.data,
+            end_date=form.end_date.data
         )
-
         db.session.add(new_employer)
         db.session.commit()
-
         flash("Employer added successfully!", "success")
+    return redirect(url_for("admin"))
 
-    return redirect(url_for("home"))
 
 @app.route("/add_relation", methods=["POST"])
 @login_required
@@ -242,22 +285,19 @@ def add_relation():
         return
 
     form = RelationForm()
-
     if form.validate_on_submit():
         parent_employer = Employer.query.filter_by(employer_name=form.parent_name.data).first()
         child_employer = Employer.query.filter_by(employer_name=form.child_name.data).first()
-
         if not parent_employer or not child_employer:
             flash("Child or Parent's name is incorrect", "danger")
             return redirect(url_for("home"))
 
-
         parent_employer.child_employers.append(child_employer)
         db.session.commit()
-
         flash("Relation added successfully!", "success")
 
-    return redirect(url_for("home"))
+    return redirect(url_for("admin"))
+
 
 if __name__ == "__main__":
     app.run()
