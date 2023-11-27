@@ -147,10 +147,7 @@ def register():
 @login_required
 def home():  # put application's code here
     form = SearchForm()
-    employer_form = NewEmployerForm()
-    relation_form = RelationForm()
-    return render_template("home.html", form=form, new_employer_form=employer_form,
-                           relation_form=relation_form, current_user=current_user)
+    return render_template("home.html", form=form, current_user=current_user)
 
 
 @app.route("/confirm/<token>")
@@ -182,6 +179,18 @@ def visualization():
         traverse_tree(employer, data, visited_nodes)
 
         return render_template("visualization.html", employer=employer, data=data)
+
+
+@app.route("/admin")
+@login_required
+def admin():
+    if not current_user.admin:
+        flash("Unauthorized Access", "danger")
+        return redirect(url_for("home"))
+    employer_form = NewEmployerForm()
+    relation_form = RelationForm()
+    return render_template("admin.html", new_employer_form=employer_form,
+                           relation_form=relation_form)
 
 
 def traverse_tree(root_employer, data, visited_nodes):
