@@ -7,48 +7,81 @@
 
       <!-- New Employer Form -->
       <div class="container overflow-hidden">
-      <div class="row gx-5">
-      <div class="col-md-6">
-      <div class="border shadow p-3 mb-5 bg-white rounded">
-      <form method="POST" action="{{ url_for('add_employer') }}">
-        {{ new_employer_form.hidden_tag() }}
-        <legend class="border-bottom mb-4">Add Employer</legend>
+        <div class="row gx-5">
+            <div class="col-md-6">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('add_employer') }}">
+                        {{ new_employer_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Add Employer</legend>
 
-        <div class="form-group">
-        {{ new_employer_form.employer_name.label(class="form-control-label") }}
-        {{ new_employer_form.employer_name(class="form-control form-control-lg") }}
-        </div>
+                            <div class="form-group">
+                                {{ new_employer_form.employer_name.label(class="form-control-label") }}
+                                {% if new_employer_form.employer_name.errors %}
+                                    {{ new_employer_form.employer_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in new_employer_form.employer_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                    {{ new_employer_form.employer_name(class="form-control form-control-lg") }}
+                                {% endif %}
+                            </div>
 
-        <div class="form-group">
-        {{ new_employer_form.headquarters_address.label(class="form-control-label") }}
-        {{ new_employer_form.headquarters_address(class="form-control form-control-lg") }}
-        </div>
+                            <div class="form-group">
+                                {{ new_employer_form.headquarters_address.label(class="form-control-label") }}
+                                {{ new_employer_form.headquarters_address(class="form-control form-control-lg") }}
+                            </div>
 
-        <div class="form-group mt-3 mb-3">
-        {{ new_employer_form.submit(class="btn btn-outline-info") }}
+                            <div class="form-group">
+                                {{ new_employer_form.description.label(class="form-control-label") }}
+                                {{ new_employer_form.description(class="form-control form-control-lg") }}
+                            </div>
+
+                            <div class="form-group">
+                                {{ new_employer_form.start_date.label(class="form-control-label") }}
+                                {% if new_employer_form.start_date.errors %}
+                                    {{ new_employer_form.start_date(class="form-control form-control-lg is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in new_employer_form.start_date.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ new_employer_form.start_date(class="form-control form-control-lg") }}
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                {{ new_employer_form.end_date.label(class="form-control-label") }}
+                                {{ new_employer_form.end_date(class="form-control form-control-lg") }}
+                            </div>
+
+                            <div class="form-group mt-3 mb-3">
+                                {{ new_employer_form.submit(class="btn btn-outline-info") }}
+                            </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('add_relation') }}">
+                        {{ relation_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Add Relation</legend>
+                            <div class="form-group">
+                                {{ relation_form.parent_name.label(class="form-control-label") }}
+                                {{ relation_form.parent_name(class="form-control form-control-lg") }}
+                            </div>
+                        <div class="form-group">
+                            {{ relation_form.child_name.label(class="form-control-label") }}
+                            {{ relation_form.child_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group mt-3 mb-3">
+                            {{ relation_form.submit(class="btn btn-outline-info") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-      </form>
-      </div>
-      </div>
-      <div class="col-md-6">
-      <div class="border shadow p-3 mb-5 bg-white rounded">
-      <form method="POST" action="{{ url_for('add_relation') }}">
-        {{ relation_form.hidden_tag() }}
-        <legend class="border-bottom mb-4">Add Relation</legend>
-        <div class="form-group">
-        {{ relation_form.parent_name.label(class="form-control-label") }}
-        {{ relation_form.parent_name(class="form-control form-control-lg") }}
-        </div>
-        <div class="form-group">
-        {{ relation_form.child_name.label(class="form-control-label") }}
-        {{ relation_form.child_name(class="form-control form-control-lg") }}
-        </div>
-        <div class="form-group mt-3 mb-3">
-        {{ relation_form.submit(class="btn btn-outline-info") }}
-        </div>
-      </form>
-      </div>
-      </div>
-      </div>
       </div>
 {% endblock content %}

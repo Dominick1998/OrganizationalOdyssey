@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Email, Length, EqualTo
+from wtforms import StringField, PasswordField, SubmitField, DateField
+from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional
 
 
 class RegistrationForm(FlaskForm):
@@ -20,10 +20,15 @@ class SearchForm(FlaskForm):
     search = StringField("Search", validators=[DataRequired()])
     submit = SubmitField("Search")
 
+
 class NewEmployerForm(FlaskForm):
     employer_name = StringField("Employer Name", validators=[DataRequired()])
     headquarters_address = StringField('Headquarters Address', validators=[DataRequired()])
+    description = StringField('Description', validators=[Optional()])
+    start_date = DateField('Start Date', validators=[DataRequired()], format='%Y-%m-%d')
+    end_date = DateField('End Date', format='%Y-%m-%d', validators=[Optional()])
     submit = SubmitField('Add Employer')
+
 
 class RelationForm(FlaskForm):
     parent_name = StringField("Parent Name", validators=[DataRequired()])

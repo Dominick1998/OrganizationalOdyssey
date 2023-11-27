@@ -11,17 +11,17 @@ from cryptography.fernet import Fernet
 app = Flask(__name__)
 
 
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505"#os.environ.get("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
 app.config['MAIL_SERVER'] = "smtp.gmail.com."
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
+app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw"#os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config["FERNET_KEY"] = os.environ.get("FERNET_KEY")
+app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ="#os.environ.get("FERNET_KEY")
 # app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
 #     username="RyanEbsen",
 #     password="InfiniteLoopLegends2023",
@@ -61,8 +61,11 @@ class Employer(db.Model):
     __tablename__ = "employer"
 
     id = db.Column(db.Integer, primary_key=True)
-    employer_name = db.Column(db.String(60), nullable=False)
+    employer_name = db.Column(db.String(60), nullable=False, unique=True)
     headquarters_address = db.Column(db.String(60), nullable=False)
+    description = db.Column(db.String(60))
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime)
     child_employers = db.relationship("Employer", secondary=employer_relation,
                                       primaryjoin=(employer_relation.c.parent_id == id),
                                       secondaryjoin=(employer_relation.c.child_id == id),
@@ -239,10 +242,17 @@ def add_employer():
 
     form = NewEmployerForm()
     if form.validate_on_submit():
+        valid_employer = Employer.query.filter_by(employer_name=form.employer_name.data).first()
+        if valid_employer:
+            flash(f"Employer with name {valid_employer.employer_name} already exists", "danger")
+            return redirect(url_for("admin"))
+
         new_employer = Employer(
             employer_name=form.employer_name.data,
-            headquarters_address=form.headquarters_address.data
-            # Add other fields as needed
+            headquarters_address=form.headquarters_address.data,
+            description=form.description.data,
+            start_date=form.start_date.data,
+            end_date=form.end_date.data
         )
         db.session.add(new_employer)
         db.session.commit()
