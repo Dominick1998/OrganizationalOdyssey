@@ -34,10 +34,12 @@
                 </div>
 
                 <div class="text-end col-md-4">
-                    {% if title != "Log in" and title != "Registration" %}
-                        <a href="{{ url_for("logout") }}" type="button" class="btn btn-outline-light me-2">Logout</a>
-                    {% else %}
+                    {% if title == "Registration" %}
+                        <a href="{{ url_for("login") }}" type="button" class="btn btn-warning">Sign-in</a>
+                    {% elif title == "Log in" %}
                         <a href="{{ url_for("register") }}" type="button" class="btn btn-warning">Sign-up</a>
+                    {% else %}
+                        <a href="{{ url_for("logout") }}" type="button" class="btn btn-outline-light me-2">Logout</a>
                     {% endif %}
                 </div>
             </div>
