@@ -18,11 +18,14 @@ function createChart(employerData)
         chart.nodes().labels().fontWeight(600);
 
         chart.tooltip().useHtml(true);
-        chart.nodes().tooltip().format("Name: {%name} </br> Address: {%address}");
-        chart.edges().tooltip().format("From: {%from_name} </br> To: {%to_name}")
+        var nodeFormat = "Name: {%name} </br> Address: {%address} " +
+                                "</br> Start Date: {%start_date} </br> End Date: {%end_date} " +
+                                "</br> Description: {%description}";
+        chart.nodes().tooltip().format(nodeFormat);
+        chart.edges().tooltip().format("From: {%from_name} </br> To: {%to_name}");
 
         // set the container id
-        chart.container("container");
+        chart.container("chart_container");
 
         // initiate drawing the chart
         chart.draw();
