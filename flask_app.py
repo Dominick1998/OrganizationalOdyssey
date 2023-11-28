@@ -197,10 +197,6 @@ def visualization(root_node=None):
     return render_template("visualization.html", employer=employer, data=data, end_time=end_time)
 
 
-@app.route("/test")
-def test():
-    return redirect(url_for("visualization", root_node="name_of_employer"))
-
 @app.route("/admin")
 @login_required
 def admin():
