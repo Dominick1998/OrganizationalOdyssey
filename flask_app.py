@@ -163,15 +163,15 @@ def confirm_account(token):
     return redirect(url_for("login"))
 
 
-@app.route("/visualization/<root_node>")
-@app.route("/visualization", methods=["POST"])
+@app.route("/visualization/<root_node>", methods=["GET", "POST"])
+@app.route("/visualization", methods=["GET", "POST"])
 @login_required
 def visualization(root_node=None):
     form = SearchForm()
-    if request.method == "POST":
-        employer = Employer.query.filter_by(employer_name=form.search.data).first()
-    else:
+    if root_node:
         employer = Employer.query.filter_by(employer_name=root_node).first()
+    else:
+        employer = Employer.query.filter_by(employer_name=form.search.data).first()
 
     if not employer:
         flash(f"Selected employer not found", "danger")
