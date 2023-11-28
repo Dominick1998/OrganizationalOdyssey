@@ -163,34 +163,43 @@ def confirm_account(token):
     return redirect(url_for("login"))
 
 
-@app.route("/visualization", methods=["GET", "POST"])
+@app.route("/visualization/<root_node>")
+@app.route("/visualization", methods=["POST"])
 @login_required
-def visualization():
+def visualization(root_node=None):
     form = SearchForm()
     if request.method == "POST":
         employer = Employer.query.filter_by(employer_name=form.search.data).first()
-        if not employer:
-            flash(f"{form.search.data} not found", "danger")
-            return redirect(url_for("home"))
-        data = {"nodes": [], "edges": []}
-        visited_nodes = []
+    else:
+        employer = Employer.query.filter_by(employer_name=root_node).first()
 
-        end_time = employer.end_date
-        end_time = end_time.strftime("%Y-%m-%d") if end_time is not None else "Active Company"
+    if not employer:
+        flash(f"Selected employer not found", "danger")
+        return redirect(url_for("home"))
 
-        description = employer.description if employer.description != "" else "No Description"
-        description = (description[:100] + "...") if len(description) > 100 else description
-        data.get("nodes").append({"id": employer.id,
-                                  "name": employer.employer_name,
-                                  "address": employer.headquarters_address,
-                                  "start_date": employer.start_date.strftime("%Y-%m-%d"),
-                                  "end_date": end_time,
-                                  "description": description,
-                                  "fill": "purple", "shape": "diamond"})
-        traverse_tree(employer, data, visited_nodes)
+    data = {"nodes": [], "edges": []}
+    visited_nodes = []
 
-        return render_template("visualization.html", employer=employer, data=data, end_time=end_time)
+    end_time = employer.end_date
+    end_time = end_time.strftime("%Y-%m-%d") if end_time is not None else "Active Company"
 
+    description = employer.description if employer.description != "" else "No Description"
+    description = (description[:100] + "...") if len(description) > 100 else description
+    data.get("nodes").append({"id": employer.id,
+                              "name": employer.employer_name,
+                              "address": employer.headquarters_address,
+                              "start_date": employer.start_date.strftime("%Y-%m-%d"),
+                              "end_date": end_time,
+                              "description": description,
+                              "fill": "purple", "shape": "diamond"})
+    traverse_tree(employer, data, visited_nodes)
+
+    return render_template("visualization.html", employer=employer, data=data, end_time=end_time)
+
+
+@app.route("/test")
+def test():
+    return redirect(url_for("visualization", root_node="name_of_employer"))
 
 @app.route("/admin")
 @login_required
