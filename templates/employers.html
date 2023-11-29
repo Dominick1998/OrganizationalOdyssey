@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% block content %}
+    <h1>All Employers</h1>
+    <ul>
+        {% for employer in all_employers %}
+        <li><a href="{{ url_for('visualization', root_node=employer.employer_name) }}">{{ employer.employer_name }}</a></li> <!--<a href="{{ url_for('visualization', root_node=employer.employer_name) }}"> </a> -->
+        {% endfor %}
+    </ul>
+{% endblock content %}

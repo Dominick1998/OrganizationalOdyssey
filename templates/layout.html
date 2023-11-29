@@ -19,7 +19,7 @@
                 {% if title != "Log in" and title != "Registration"%}
                     <ul class="nav col-md-4">
                         <li><a href="{{ url_for("home") }}" class="nav-link px-2 text-white">Home</a></li>
-                        <li><a href="{{ url_for("visualization") }}" class="nav-link px-2 text-white">Visualization</a></li>
+                        <li><a href="{{ url_for("employers") }}" class="nav-link px-2 text-white">Employers</a></li>
                         {% if current_user.admin == True %}
                             <li><a href="{{ url_for("admin") }}" class="nav-link px-2 text-white">Admin</a></li>
                         {%endif%}

@@ -204,6 +204,12 @@ def admin():
     return render_template("admin.html", new_employer_form=employer_form,
                            relation_form=relation_form)
 
+@app.route("/employers")
+@login_required
+def employers():
+    all_employers = Employer.query.all()
+    return render_template("employers.html", all_employers=all_employers)
+
 
 def traverse_tree(root_employer, data, visited_nodes):
     if root_employer in visited_nodes:
