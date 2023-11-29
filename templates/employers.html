@@ -1,9 +1,18 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <h1>All Employers</h1>
-    <ul>
-        {% for employer in all_employers %}
-        <li><a href="{{ url_for('visualization', root_node=employer.employer_name) }}">{{ employer.employer_name }}</a></li> <!--<a href="{{ url_for('visualization', root_node=employer.employer_name) }}"> </a> -->
-        {% endfor %}
-    </ul>
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+    <h1 class="border-bottom mb-4">All Employers</h1>
+    <div class="container" style="height: 80vh; overflow-y: auto;" data-spy="scroll">
+        <ul class="list-group list-group-flush">
+            {% for employer in all_employers %}
+            <li class="list-group-item">
+                <a class="employer-link text-dark" href="{{ url_for('visualization', root_node=employer.employer_name) }}">
+                    {{ employer.employer_name }}</a>
+            <p class="employer-description text-muted small">{{ employer.description }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock content %}
