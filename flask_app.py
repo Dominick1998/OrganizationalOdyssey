@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template, url_for, redirect, request, flash
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, RelationForm
+from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, EditEmployerForm, RelationForm
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
@@ -163,34 +163,38 @@ def confirm_account(token):
     return redirect(url_for("login"))
 
 
+@app.route("/visualization/<root_node>", methods=["GET", "POST"])
 @app.route("/visualization", methods=["GET", "POST"])
 @login_required
-def visualization():
+def visualization(root_node=None):
     form = SearchForm()
-    if request.method == "POST":
+    if root_node:
+        employer = Employer.query.filter_by(employer_name=root_node).first()
+    else:
         employer = Employer.query.filter_by(employer_name=form.search.data).first()
-        if not employer:
-            flash(f"{form.search.data} not found", "danger")
-            return redirect(url_for("home"))
-        print(employer.employer_name)
-        data = {"nodes": [], "edges": []}
-        visited_nodes = []
 
-        end_time = employer.end_date
-        end_time = end_time.strftime("%Y-%m-%d") if end_time is not None else "Active Company"
+    if not employer:
+        flash(f"Selected employer not found", "danger")
+        return redirect(url_for("home"))
 
-        description = employer.description if employer.description is not "" else "No Description"
-        description = (description[:100] + "...") if len(description) > 100 else description
-        data.get("nodes").append({"id": employer.id,
-                                  "name": employer.employer_name,
-                                  "address": employer.headquarters_address,
-                                  "start_date": employer.start_date.strftime("%Y-%m-%d"),
-                                  "end_date": end_time,
-                                  "description": description,
-                                  "fill": "purple", "shape": "diamond"})
-        traverse_tree(employer, data, visited_nodes)
+    data = {"nodes": [], "edges": []}
+    visited_nodes = []
 
-        return render_template("visualization.html", employer=employer, data=data, end_time=end_time)
+    end_time = employer.end_date
+    end_time = end_time.strftime("%Y-%m-%d") if end_time is not None else "Active Company"
+
+    description = employer.description if employer.description != "" else "No Description"
+    description = (description[:100] + "...") if len(description) > 100 else description
+    data.get("nodes").append({"id": employer.id,
+                              "name": employer.employer_name,
+                              "address": employer.headquarters_address,
+                              "start_date": employer.start_date.strftime("%Y-%m-%d"),
+                              "end_date": end_time,
+                              "description": description,
+                              "fill": "purple", "shape": "diamond"})
+    traverse_tree(employer, data, visited_nodes)
+
+    return render_template("visualization.html", employer=employer, data=data, end_time=end_time)
 
 
 @app.route("/admin")
@@ -200,9 +204,10 @@ def admin():
         flash("Unauthorized Access", "danger")
         return redirect(url_for("home"))
     employer_form = NewEmployerForm()
+    edit_employer_form = EditEmployerForm()
     relation_form = RelationForm()
     return render_template("admin.html", new_employer_form=employer_form,
-                           relation_form=relation_form)
+                           relation_form=relation_form, edit_employer_form=edit_employer_form)
 
 @app.route("/employers")
 @login_required
@@ -217,7 +222,7 @@ def traverse_tree(root_employer, data, visited_nodes):
     end_time = root_employer.end_date
     end_time = end_time.strftime("%Y-%m-%d") if end_time is not None else "Active Company"
 
-    description = root_employer.description if root_employer.description is not "" else "No Description"
+    description = root_employer.description if root_employer.description != "" else "No Description"
 
     data.get("nodes").append({"id": root_employer.id,
                               "name": root_employer.employer_name,
@@ -281,6 +286,39 @@ def add_employer():
         db.session.add(new_employer)
         db.session.commit()
         flash("Employer added successfully!", "success")
+    return redirect(url_for("admin"))
+
+
+@app.route("/edit_employer", methods=["POST"])
+@login_required
+def edit_employer():
+    if not current_user.admin:
+        return
+
+    form = EditEmployerForm()
+    if form.validate_on_submit():
+        employer = Employer.query.filter_by(employer_name=form.employer_name.data).first()
+        if not employer:
+            flash(f"{form.employer_name.data} does not exist", "danger")
+            return redirect(url_for("admin"))
+
+        edited = False
+        if form.headquarters_address.data:
+            employer.headquarters_address = form.headquarters_address.data
+            edited = True
+        if form.description.data:
+            employer.description = form.description.data
+            edited = True
+        if form.start_date.data:
+            employer.start_date = form.start_date.data
+            edited = True
+        if form.end_date.data:
+            employer.end_date = form.end_date.data
+            edited = True
+        db.session.commit()
+
+        if edited:
+            flash("Employer has been successfully updated!", "success")
     return redirect(url_for("admin"))
 
 

@@ -30,6 +30,15 @@ class NewEmployerForm(FlaskForm):
     submit = SubmitField('Add Employer')
 
 
+class EditEmployerForm(FlaskForm):
+    employer_name = StringField("Employer Name", validators=[DataRequired()])
+    headquarters_address = StringField('Headquarters Address', validators=[Optional()])
+    description = StringField('Description', validators=[Optional()])
+    start_date = DateField('Start Date', validators=[Optional()], format='%Y-%m-%d')
+    end_date = DateField('End Date', format='%Y-%m-%d', validators=[Optional()])
+    submit = SubmitField('Edit Employer')
+
+
 class RelationForm(FlaskForm):
     parent_name = StringField("Parent Name", validators=[DataRequired()])
     child_name = StringField('Child Name', validators=[DataRequired()])
