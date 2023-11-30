@@ -213,6 +213,9 @@ def admin():
 @login_required
 def employers():
     all_employers = Employer.query.all()
+    for employer in all_employers:
+        employer.description = employer.description if employer.description != "" else "No Description"
+        employer.description = (employer.description[:50] + "...") if len(employer.description) > 50 else employer.description
     return render_template("employers.html", all_employers=all_employers)
 
 

@@ -1,18 +1,69 @@
 {% extends 'layout.html' %}
 {% block content %}
-<head>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
     <h1 class="border-bottom mb-4">All Employers</h1>
     <div class="container" style="height: 80vh; overflow-y: auto;" data-spy="scroll">
-        <ul class="list-group list-group-flush">
-            {% for employer in all_employers %}
-            <li class="list-group-item">
-                <a class="employer-link text-dark" href="{{ url_for('visualization', root_node=employer.employer_name) }}">
-                    {{ employer.employer_name }}</a>
-            <p class="employer-description text-muted small">{{ employer.description }}</p>
-            </li>
-            {% endfor %}
-        </ul>
+        <table id="employer_table" class="table table-hover">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)" scope="col"><a href="#" class="text-dark" >Employer</a></th>
+                    <th onclick="sortTable(1)" scope="col"><a href="#" class="text-dark" >Headquarters</a></th>
+                    <th onclick="sortTable(2)" scope="col"><a href="#" class="text-dark" >Description</a></th>
+                    <th onclick="sortTable(3)" scope="col"><a href="#" class="text-dark" >Start Date</a></th>
+                    <th onclick="sortTable(4)" scope="col"><a href="#" class="text-dark" >End Date</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for employer in all_employers %}
+                    <tr>
+                        <td><a class ="text-dark"href="{{ url_for('visualization', root_node=employer.employer_name) }}">{{ employer.employer_name }}</a></td>
+                        <td>{{ employer.headquarters_address }}</td>
+                        <td>{{ employer.description }}</td>
+                        <td>{{ employer.start_date.strftime("%Y-%m-%d") }}</td>
+                        <td>{% if employer.end_date %}{{ employer.end_date.strftime("%Y-%m-%d") }}{% else %}Active{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+
+
+    <script>
+        function sortTable(n) {
+          var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+          table = document.getElementById("employer_table");
+          switching = true;
+          dir = "asc";
+          while (switching) {
+            switching = false;
+            rows = table.rows;
+            for (i = 1; i < (rows.length - 1); i++) {
+              shouldSwitch = false;
+              x = rows[i].getElementsByTagName("TD")[n];
+              y = rows[i + 1].getElementsByTagName("TD")[n];
+              if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                  //if so, mark as a switch and break the loop:
+                  shouldSwitch= true;
+                  break;
+                }
+              } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                  shouldSwitch = true;
+                  break;
+                }
+              }
+            }
+            if (shouldSwitch) {
+              rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+              switching = true;
+              switchcount ++;
+            } else {
+              if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+              }
+            }
+          }
+        }
+    </script>
 {% endblock content %}
