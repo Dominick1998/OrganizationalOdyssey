@@ -39,6 +39,11 @@ class EditEmployerForm(FlaskForm):
     submit = SubmitField('Edit Employer')
 
 
+class DeleteEmployerForm(FlaskForm):
+    employer_name = StringField("Employer Name", validators=[DataRequired()])
+    submit = SubmitField('Delete Employer')
+
+
 class RelationForm(FlaskForm):
     parent_name = StringField("Parent Name", validators=[DataRequired()])
     child_name = StringField('Child Name', validators=[DataRequired()])
