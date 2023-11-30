@@ -3,7 +3,8 @@ import os
 from flask import Flask, render_template, url_for, redirect, request, flash
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, EditEmployerForm, RelationForm
+from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, EditEmployerForm,\
+    RelationForm, DeleteEmployerForm
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
@@ -164,7 +165,7 @@ def confirm_account(token):
 
 
 @app.route("/visualization/<root_node>", methods=["GET", "POST"])
-@app.route("/visualization", methods=["GET", "POST"])
+@app.route("/visualization", methods=["POST"])
 @login_required
 def visualization(root_node=None):
     form = SearchForm()
@@ -205,9 +206,12 @@ def admin():
         return redirect(url_for("home"))
     employer_form = NewEmployerForm()
     edit_employer_form = EditEmployerForm()
+    delete_employer_form = DeleteEmployerForm()
     relation_form = RelationForm()
     return render_template("admin.html", new_employer_form=employer_form,
-                           relation_form=relation_form, edit_employer_form=edit_employer_form)
+                           relation_form=relation_form,
+                           edit_employer_form=edit_employer_form, delete_employer_form=delete_employer_form)
+
 
 @app.route("/employers")
 @login_required
@@ -322,6 +326,30 @@ def edit_employer():
 
         if edited:
             flash("Employer has been successfully updated!", "success")
+    return redirect(url_for("admin"))
+
+
+@app.route("/delete_employer", methods=["POST"])
+@login_required
+def delete_employer():
+    if not current_user.admin:
+        return
+
+    form = DeleteEmployerForm()
+    if form.validate_on_submit():
+        employer = Employer.query.filter_by(employer_name=form.employer_name.data).first()
+
+        if not employer:
+            flash(f"{form.employer_name.data} does not exist", "danger")
+            return redirect(url_for("admin"))
+
+        if employer.child_employers:
+            flash(f"Cannot delete employer with child relationships", "danger")
+            return redirect(url_for("admin"))
+
+        db.session.delete(employer)
+        db.session.commit()
+        flash(f"Employer deleted", "success")
     return redirect(url_for("admin"))
 
 
