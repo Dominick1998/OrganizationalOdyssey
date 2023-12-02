@@ -14,6 +14,7 @@
         <li><a data-toggle="tab" href="#addrelation" class="btn btn-outline-info border">Add Relation</a></li>
         <li><a data-toggle="tab" href="#editemployer" class="btn btn-outline-info border">Edit Employer</a></li>
         <li><a data-toggle="tab" href="#deleteemployer" class="btn btn-outline-info border">Delete Employer</a></li>
+        <li><a data-toggle="tab" href="#addadmin" class="btn btn-outline-info border">Add Admin</a></li>
     </ul>
 
     <div class="tab-content">
@@ -158,6 +159,32 @@
 
                 <div class="form-group mt-3 mb-3">
                     {{ delete_employer_form.submit(class="btn btn-outline-info") }}
+                </div>
+            </form>
+        </div>
+    </div>
+        <div id="addadmin" class="tab-pane">
+        <div class="border shadow p-3 mb-5 bg-white rounded">
+            <form method="POST" action="{{ url_for('add_admin') }}">
+                {{ add_admin_form.hidden_tag() }}
+                <legend class="border-bottom mb-4">Add Admin</legend>
+
+                <div class="form-group">
+                    {{ add_admin_form.email_address.label(class="form-control-label") }}
+                    {% if add_admin_form.email_address.errors %}
+                        {{ add_admin_form.email_address(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in add_admin_form.employer_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ add_admin_form.email_address(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group mt-3 mb-3">
+                    {{ add_admin_form.submit(class="btn btn-outline-info") }}
                 </div>
             </form>
         </div>

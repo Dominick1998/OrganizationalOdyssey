@@ -48,3 +48,8 @@ class RelationForm(FlaskForm):
     parent_name = StringField("Parent Name", validators=[DataRequired()])
     child_name = StringField('Child Name', validators=[DataRequired()])
     submit = SubmitField('Add Relation')
+
+
+class AddAdminForm(FlaskForm):
+    email_address = StringField("Email Address", validators=[DataRequired()])
+    submit = SubmitField("Create Admin")

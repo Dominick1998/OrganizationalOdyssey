@@ -4,7 +4,7 @@ from flask import Flask, render_template, url_for, redirect, request, flash
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, EditEmployerForm,\
-    RelationForm, DeleteEmployerForm
+    RelationForm, DeleteEmployerForm, AddAdminForm
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
@@ -208,9 +208,11 @@ def admin():
     edit_employer_form = EditEmployerForm()
     delete_employer_form = DeleteEmployerForm()
     relation_form = RelationForm()
+    add_admin_form = AddAdminForm()
     return render_template("admin.html", new_employer_form=employer_form,
                            relation_form=relation_form,
-                           edit_employer_form=edit_employer_form, delete_employer_form=delete_employer_form)
+                           edit_employer_form=edit_employer_form,
+                           delete_employer_form=delete_employer_form, add_admin_form=add_admin_form)
 
 
 @app.route("/employers")
@@ -252,22 +254,6 @@ def traverse_tree(root_employer, data, visited_nodes):
                                   "from_name": parent_employer.employer_name,
                                   "to_name": root_employer.employer_name})
         traverse_tree(parent_employer, data, visited_nodes)
-
-
-@app.route("/make_me_admin")
-def make_me_admin():
-    user = User.query.filter_by(email=current_user.email).first()
-    user.admin = True
-    db.session.commit()
-    return redirect(url_for("home"))
-
-
-@app.route("/make_me_not_admin")
-def make_me_not_admin():
-    user = User.query.filter_by(email=current_user.email).first()
-    user.admin = False
-    db.session.commit()
-    return redirect(url_for("home"))
 
 
 @app.route("/add_employer", methods=["POST"])
@@ -374,6 +360,26 @@ def add_relation():
         parent_employer.child_employers.append(child_employer)
         db.session.commit()
         flash("Relation added successfully!", "success")
+
+    return redirect(url_for("admin"))
+
+
+@app.route("/add_admin", methods=["POST"])
+@login_required
+def add_admin():
+    if not current_user.admin:
+        return
+
+    form = AddAdminForm()
+    if form.validate_on_submit():
+        new_admin = User.query.filter_by(email=form.email_address.data).first()
+        if not new_admin:
+            flash("User does not exits", "danger")
+            return redirect(url_for("admin"))
+
+        new_admin.admin = True
+        db.session.commit()
+        flash("New admin successfully added", "success")
 
     return redirect(url_for("admin"))
 
