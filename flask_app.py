@@ -367,6 +367,10 @@ def add_relation():
             flash("Child or Parent's name is incorrect", "danger")
             return redirect(url_for("home"))
 
+        if child_employer in parent_employer.child_employers:
+            flash("Relation already exits", "danger")
+            return redirect(url_for("admin"))
+
         parent_employer.child_employers.append(child_employer)
         db.session.commit()
         flash("Relation added successfully!", "success")
