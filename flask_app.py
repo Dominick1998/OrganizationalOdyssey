@@ -13,7 +13,6 @@ app = Flask(__name__)
 
 
 app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505"#os.environ.get("SECRET_KEY")
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///site.db"
 app.config['MAIL_SERVER'] = "smtp.gmail.com."
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com"
@@ -23,12 +22,12 @@ app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw"#os.environ.get("MAIL_PASSWORD")
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ="#os.environ.get("FERNET_KEY")
-# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
-#     username="RyanEbsen",
-#     password="InfiniteLoopLegends2023",
-#     hostname="RyanEbsen.mysql.pythonanywhere-services.com",
-#     databasename="RyanEbsen$default"
-# )
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
+    username="RyanEbsen",
+    password="InfiniteLoopLegends2023",
+    hostname="RyanEbsen.mysql.pythonanywhere-services.com",
+    databasename="RyanEbsen$default"
+)
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -38,11 +37,6 @@ login_manager = LoginManager(app)
 
 
 employer_relation = db.Table("employer_relation",
-                             db.Column('parent_id', db.Integer, db.ForeignKey('employer.id')),
-                             db.Column('child_id', db.Integer, db.ForeignKey('employer.id'))
-                             )
-
-employee_relation = db.Table("employee_relation",
                              db.Column('parent_id', db.Integer, db.ForeignKey('employer.id')),
                              db.Column('child_id', db.Integer, db.ForeignKey('employer.id'))
                              )
@@ -71,18 +65,6 @@ class Employer(db.Model):
                                       primaryjoin=(employer_relation.c.parent_id == id),
                                       secondaryjoin=(employer_relation.c.child_id == id),
                                       backref="parent_employers")
-    employees = db.relationship("Employee", secondary=employee_relation,
-                                primaryjoin=(employee_relation.c.parent_id == id),
-                                secondaryjoin=(employee_relation.c.child_id == id),
-                                backref="employers")
-
-
-class Employee(db.Model):
-    __tablename__ = "employee"
-
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(60), nullable=False)
-    last_name = db.Column(db.String(60), nullable=False)
 
 
 @login_manager.user_loader
@@ -219,10 +201,12 @@ def admin():
 @login_required
 def employers():
     all_employers = Employer.query.all()
+    employer_descriptions = []
     for employer in all_employers:
-        employer.description = employer.description if employer.description != "" else "No Description"
-        employer.description = (employer.description[:50] + "...") if len(employer.description) > 50 else employer.description
-    return render_template("employers.html", all_employers=all_employers)
+        employer_description = employer.description if employer.description != "" else "No Description"
+        employer_description = (employer.description[:50] + "...") if len(employer.description) > 50 else employer.description
+        employer_descriptions.append(employer_description)
+    return render_template("employers.html", all_employers=all_employers, employer_descriptions=employer_descriptions)
 
 
 def traverse_tree(root_employer, data, visited_nodes):
