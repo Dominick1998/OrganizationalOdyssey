@@ -43,6 +43,27 @@ class DeleteEmployerForm(FlaskForm):
     employer_name = StringField("Employer Name", validators=[DataRequired()])
     submit = SubmitField('Delete Employer')
 
+class AddEmployeeForm(FlaskForm):
+    first_name = StringField("First Name", validators=[DataRequired()])
+    last_name = StringField("Last Name", validators=[DataRequired()])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    phone_number = StringField("Phone Number", validators=[Optional()])
+    position = StringField("Position", validators=[DataRequired()])
+    submit = SubmitField('Add Employee')
+
+class EditEmployeeForm(FlaskForm):
+    first_name = StringField("First Name", validators=[DataRequired()])
+    last_name = StringField("Last Name", validators=[DataRequired()])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    phone_number = StringField("Phone Number", validators=[Optional()])
+    position = StringField("Position", validators=[DataRequired()])
+    submit = SubmitField('Edit Employee')
+
+class DeleteEmployeeForm(FlaskForm):
+    first_name = StringField("First Name", validators=[DataRequired()])
+    last_name = StringField("Last Name", validators=[DataRequired()])
+    submit = SubmitField('Delete Employee')
+
 
 class RelationForm(FlaskForm):
     parent_name = StringField("Parent Name", validators=[DataRequired()])
