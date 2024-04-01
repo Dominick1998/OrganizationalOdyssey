@@ -62,7 +62,7 @@ The application should now be accessible at `http://localhost:5000`.
 
 ### Quick Start
 
-To quickly sign up and start using Organizational Odyssey, visit the [Sign Up page](https://calebmcquay.pythonanywhere.com/signup).
+To quickly sign up and start using Organizational Odyssey, visit the [Register page](https://calebmcquay.pythonanywhere.com/register).
 
 After logging in, users can navigate through the dashboard to manage employees, view the organizational structure, and access various data visualizations. The system allows for detailed management of employee records and provides insights into the organizational hierarchy through interactive charts and graphs.
 
