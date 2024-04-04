@@ -11,9 +11,13 @@
       <!-- Admin-specific content goes here -->
     <ul class="nav">
         <li class="active"><a data-toggle="tab" href="#addemployer" class="btn btn-outline-info border">Add Employer</a></li>
-        <li><a data-toggle="tab" href="#addrelation" class="btn btn-outline-info border">Add Relation</a></li>
         <li><a data-toggle="tab" href="#editemployer" class="btn btn-outline-info border">Edit Employer</a></li>
         <li><a data-toggle="tab" href="#deleteemployer" class="btn btn-outline-info border">Delete Employer</a></li>
+        <li><a data-toggle="tab" href="#addrelation" class="btn btn-outline-info border">Add Employer Relation</a></li>
+        <li><a data-toggle="tab" href="#addemployeerelation" class="btn btn-outline-info border">Add Employee Relation</a></li>
+        <li><a data-toggle="tab" href="#addemployee" class="btn btn-outline-info border">Add Employee</a></li>
+        <li><a data-toggle="tab" href="#editemployee" class="btn btn-outline-info border">Edit Employee</a></li>
+        <li><a data-toggle="tab" href="#deleteemployee" class="btn btn-outline-info border">Delete Employee</a></li>
         <li><a data-toggle="tab" href="#addadmin" class="btn btn-outline-info border">Add Admin</a></li>
     </ul>
 
@@ -74,9 +78,9 @@
       </div>
       <div id="addrelation" class="tab-pane">
         <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('add_relation') }}">
+            <form method="POST" action="{{ url_for('add_employer_relation') }}">
                 {{ relation_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Add Relation</legend>
+                <legend class="border-bottom mb-4">Add Employer-Employer Relation</legend>
                 <div class="form-group">
                     {{ relation_form.parent_name.label(class="form-control-label") }}
                     {{ relation_form.parent_name(class="form-control form-control-lg") }}
@@ -91,6 +95,41 @@
             </form>
         </div>
       </div>
+    <div id="addemployeerelation" class="tab-pane">
+            <div class="border shadow p-3 mb-5 bg-white rounded">
+                <form method="POST" action="{{ url_for('add_employee_relation') }}">
+                    {{ employee_relation_form.hidden_tag() }}
+                    <legend class="border-bottom mb-4">Add Employee-Employer Relation</legend>
+                    <div class="form-group">
+                        {{ employee_relation_form.first_name.label(class="form-control-label") }}
+                        {{ employee_relation_form.first_name(class="form-control form-control-lg") }}
+                    </div>
+                    <div class="form-group">
+                        {{ employee_relation_form.last_name.label(class="form-control-label") }}
+                        {{ employee_relation_form.last_name(class="form-control form-control-lg") }}
+                    </div>
+                    <div class="form-group">
+                        {{ employee_relation_form.employer_name.label(class="form-control-label") }}
+                        {{ employee_relation_form.employer_name(class="form-control form-control-lg") }}
+                    </div>
+                    <div class="form-group">
+                        {{ employee_relation_form.job_title.label(class="form-control-label") }}
+                        {{ employee_relation_form.job_title(class="form-control form-control-lg") }}
+                    </div>
+                    <div class="form-group">
+                        {{ employee_relation_form.start_date.label(class="form-control-label") }}
+                        {{ employee_relation_form.start_date(class="form-control form-control-lg") }}
+                    </div>
+                    <div class="form-group">
+                        {{ employee_relation_form.end_date.label(class="form-control-label") }}
+                        {{ employee_relation_form.end_date(class="form-control form-control-lg") }}
+                    </div>
+                    <div class="form-group mt-3 mb-3">
+                        {{ employee_relation_form.submit(class="btn btn-outline-info border rounded") }}
+                    </div>
+                </form>
+            </div>
+        </div>
     <div id="editemployer" class="tab-pane">
         <div class="border shadow p-3 mb-5 bg-white rounded">
             <form method="POST" action="{{ url_for('edit_employer') }}">
@@ -163,6 +202,162 @@
             </form>
         </div>
     </div>
+    <div id="addemployee" class="tab-pane">
+        <div class="border shadow p-3 mb-5 bg-white rounded">
+            <form method="POST" action="{{ url_for('add_employee') }}">
+                {{ add_employee_form.hidden_tag() }}
+                <legend class="border-bottom mb-4">Add Employee</legend>
+                <div class="form-group">
+                    {{ add_employee_form.first_name.label(class="form-control-label") }}
+                    {% if add_employee_form.first_name.errors %}
+                        {{ add_employee_form.first_name(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in add_employee_form.first_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ add_employee_form.first_name(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ add_employee_form.last_name.label(class="form-control-label") }}
+                    {% if add_employee_form.last_name.errors %}
+                        {{ add_employee_form.last_name(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in add_employee_form.last_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ add_employee_form.last_name(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ add_employee_form.email.label(class="form-control-label") }}
+                    {% if add_employee_form.email.errors %}
+                        {{ add_employee_form.email(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in add_employee_form.email.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ add_employee_form.email(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ add_employee_form.phone_number.label(class="form-control-label") }}
+                    {{ add_employee_form.phone_number(class="form-control form-control-lg") }}
+                </div>
+
+                <div class="form-group mt-3 mb-3">
+                    {{ add_employee_form.submit(class="btn btn-outline-info border rounded") }}
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="editemployee" class="tab-pane">
+        <div class="border shadow p-3 mb-5 bg-white rounded">
+            <form method="POST" action="{{ url_for('edit_employee') }}">
+                {{ edit_employee_form.hidden_tag() }}
+                <legend class="border-bottom mb-4">Edit Employee</legend>
+
+                <div class="form-group">
+                    {{ edit_employee_form.first_name.label(class="form-control-label") }}
+                    {% if edit_employee_form.first_name.errors %}
+                        {{ edit_employee_form.first_name(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in edit_employee_form.first_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ edit_employee_form.first_name(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ edit_employee_form.last_name.label(class="form-control-label") }}
+                    {% if edit_employee_form.last_name.errors %}
+                        {{ edit_employee_form.last_name(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in edit_employee_form.last_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ edit_employee_form.last_name(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ edit_employee_form.email.label(class="form-control-label") }}
+                    {% if edit_employee_form.email.errors %}
+                        {{ edit_employee_form.email(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in edit_employee_form.email.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ edit_employee_form.email(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ edit_employee_form.phone_number.label(class="form-control-label") }}
+                    {{ edit_employee_form.phone_number(class="form-control form-control-lg") }}
+                </div>
+
+                <div class="form-group mt-3 mb-3">
+                    {{ edit_employee_form.submit(class="btn btn-outline-info") }}
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="deleteemployer" class="tab-pane">
+        <div class="border shadow p-3 mb-5 bg-white rounded">
+            <form method="POST" action="{{ url_for('delete_employee') }}">
+                {{ delete_employee_form.hidden_tag() }}
+                <legend class="border-bottom mb-4">Delete Employee</legend>
+
+                <div class="form-group">
+                    {{ delete_employee_form.first_name.label(class="form-control-label") }}
+                    {% if delete_employee_form.first_name.errors %}
+                        {{ delete_employee_form.first_name(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in delete_employee_form.first_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ delete_employee_form.first_name(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ delete_employee_form.last_name.label(class="form-control-label") }}
+                    {% if delete_employee_form.last_name.errors %}
+                        {{ delete_employee_form.last_name(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in delete_employee_form.last_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ delete_employee_form.last_name(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group mt-3 mb-3">
+                    {{ delete_employee_form.submit(class="btn btn-outline-info") }}
+                </div>
+            </form>
+        </div>
         <div id="addadmin" class="tab-pane">
         <div class="border shadow p-3 mb-5 bg-white rounded">
             <form method="POST" action="{{ url_for('add_admin') }}">

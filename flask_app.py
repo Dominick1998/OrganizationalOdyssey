@@ -3,8 +3,7 @@ import os
 from flask import Flask, render_template, url_for, redirect, request, flash
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, EditEmployerForm,\
-    RelationForm, DeleteEmployerForm, AddAdminForm
+from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, EditEmployerForm, EmployerRelationForm, EmployeeRelationForm, DeleteEmployerForm, AddAdminForm, AddEmployeeForm, EditEmployeeForm, DeleteEmployeeForm
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
@@ -12,14 +11,14 @@ from cryptography.fernet import Fernet
 app = Flask(__name__)
 
 
-app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505" #os.environ.get("SECRET_KEY")
+app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505"#os.environ.get("SECRET_KEY")
 app.config['MAIL_SERVER'] = "smtp.gmail.com."
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com"
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw" #os.environ.get("MAIL_PASSWORD")
-app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ=" #os.environ.get("FERNET_KEY")
+app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw"#os.environ.get("MAIL_PASSWORD")
+app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ="#os.environ.get("FERNET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
     username="calebmcquay",
     password="OrganizationalOdyssey",
@@ -39,6 +38,14 @@ employer_relation = db.Table("employer_relation",
                              db.Column('child_id', db.Integer, db.ForeignKey('employer.id'))
                              )
 
+employee_relation = db.Table("employee_relation",
+                             db.Column('job_id', db.Integer, primary_key=True),
+                             db.Column('employee_id', db.Integer, db.ForeignKey('employee.id')),
+                             db.Column('employer_id', db.Integer, db.ForeignKey('employer.id')),
+                             db.Column('job_title', db.String(100), nullable=False),
+                             db.Column('start_date', db.DateTime, nullable=False),
+                             db.Column('end_date', db.DateTime)
+                             )
 
 class User(UserMixin, db.Model):
     __tablename__ = "user"
@@ -49,7 +56,6 @@ class User(UserMixin, db.Model):
     admin = db.Column(db.Boolean, nullable=False, default=False)
     email_confirmed = db.Column(db.Boolean, nullable=False, default=False)
 
-
 class Employer(db.Model):
     __tablename__ = "employer"
 
@@ -59,10 +65,31 @@ class Employer(db.Model):
     description = db.Column(db.String(60))
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime)
-    child_employers = db.relationship("Employer", secondary=employer_relation,
-                                      primaryjoin=(employer_relation.c.parent_id == id),
-                                      secondaryjoin=(employer_relation.c.child_id == id),
+    child_employers = db.relationship("Employer", secondary="employer_relation",
+                                      primaryjoin=("employer_relation.c.parent_id == Employer.id"),
+                                      secondaryjoin=("employer_relation.c.child_id == Employer.id"),
                                       backref="parent_employers")
+    has_employed = db.relationship("Employee",
+                                   secondary="employee_relation",
+                                   primaryjoin=("Employer.id == employee_relation.c.employer_id"),
+                                   secondaryjoin=("Employee.id == employee_relation.c.employee_id"),
+                                   backref="employers_employed",
+                                   overlaps="employers_employed")
+
+class Employee(db.Model):
+    __tablename__ = "employee"
+
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(60), nullable=False)
+    last_name = db.Column(db.String(60), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    phone_number = db.Column(db.String(15))
+    employed_by = db.relationship("Employer",
+                                  secondary="employee_relation",
+                                  primaryjoin=("Employee.id == employee_relation.c.employee_id"),
+                                  secondaryjoin=("Employer.id == employee_relation.c.employer_id"),
+                                  backref="employees",
+                                  overlaps="employers_employed")
 
 
 @login_manager.user_loader
@@ -187,12 +214,19 @@ def admin():
     employer_form = NewEmployerForm()
     edit_employer_form = EditEmployerForm()
     delete_employer_form = DeleteEmployerForm()
-    relation_form = RelationForm()
+    add_employee_form = AddEmployeeForm()
+    edit_employee_form = EditEmployeeForm()
+    delete_employee_form = DeleteEmployeeForm()
+    relation_form = EmployerRelationForm()
+    employee_relation_form = EmployeeRelationForm()
     add_admin_form = AddAdminForm()
     return render_template("admin.html", new_employer_form=employer_form,
                            relation_form=relation_form,
+                           employee_relation_form=employee_relation_form,
                            edit_employer_form=edit_employer_form,
-                           delete_employer_form=delete_employer_form, add_admin_form=add_admin_form)
+                           delete_employer_form=delete_employer_form,
+                           add_employee_form=add_employee_form, edit_employee_form=edit_employee_form, delete_employee_form=delete_employee_form,
+                           add_admin_form=add_admin_form)
 
 
 @app.route("/employers")
@@ -321,13 +355,13 @@ def delete_employer():
     return redirect(url_for("admin"))
 
 
-@app.route("/add_relation", methods=["POST"])
+@app.route("/add_employer_relation", methods=["POST"])
 @login_required
-def add_relation():
+def add_employer_relation():
     if not current_user.admin:
         return
 
-    form = RelationForm()
+    form = EmployerRelationForm()
     if form.validate_on_submit():
         parent_employer = Employer.query.filter_by(employer_name=form.parent_name.data).first()
         child_employer = Employer.query.filter_by(employer_name=form.child_name.data).first()
@@ -343,6 +377,101 @@ def add_relation():
         db.session.commit()
         flash("Relation added successfully!", "success")
 
+    return redirect(url_for("admin"))
+
+@app.route("/add_employee_relation", methods=["POST"])
+@login_required
+def add_employee_relation():
+    if not current_user.admin:
+        return
+
+    form = EmployeeRelationForm()
+    if form.validate_on_submit():
+        first_name = form.first_name.data
+        last_name = form.last_name.data
+        employer_name = form.employer_name.data
+        job_title = form.job_title.data
+        start_date = form.start_date.data
+        end_date = form.end_date.data
+
+        # Check if the employer exists
+        employer = Employer.query.filter_by(employer_name=employer_name).first()
+        if not employer:
+            flash("Employer not found", "danger")
+            return redirect(url_for("admin"))
+
+        # Check if the employee exists
+        employee = Employee.query.filter_by(first_name=first_name, last_name=last_name).first()
+        if not employee:
+            flash("Employee not found", "danger")
+            return redirect(url_for("admin"))
+
+        db.session.execute(employee_relation.insert().values(employee_id=employee.id, employer_id=employer.id,
+                                                             job_title=job_title, start_date=start_date,
+                                                             end_date=end_date))
+        db.session.commit()
+
+        flash("Employee relation added successfully!", "success")
+
+    return redirect(url_for("admin"))
+
+@app.route("/add_employee", methods=["POST"])
+@login_required
+def add_employee():
+    if not current_user.admin:
+        return
+
+    form = AddEmployeeForm()
+    if form.validate_on_submit():
+        new_employee = Employee(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            phone_number=form.phone_number.data
+        )
+        db.session.add(new_employee)
+        db.session.commit()
+        flash("Employee added successfully!", "success")
+    return redirect(url_for("admin"))
+
+@app.route("/edit_employee", methods=["POST"])
+@login_required
+def edit_employee():
+    if not current_user.admin:
+        return
+
+    form = EditEmployeeForm()
+    if form.validate_on_submit():
+        employee = Employee.query.filter_by(first_name=form.first_name.data, last_name=form.last_name.data).first()
+        if not employee:
+            flash("Employee not found", "danger")
+            return redirect(url_for("admin"))
+
+        if form.email.data:
+            employee.email = form.email.data
+        if form.phone_number.data:
+            employee.phone_number = form.phone_number.data
+
+        db.session.commit()
+        flash("Employee has been successfully updated!", "success")
+    return redirect(url_for("admin"))
+
+@app.route("/delete_employee", methods=["POST"])
+@login_required
+def delete_employee():
+    if not current_user.admin:
+        return
+
+    form = DeleteEmployeeForm()
+    if form.validate_on_submit():
+        employee = Employee.query.filter_by(first_name=form.first_name.data, last_name=form.last_name.data).first()
+        if not employee:
+            flash("Employee not found", "danger")
+            return redirect(url_for("admin"))
+
+        db.session.delete(employee)
+        db.session.commit()
+        flash("Employee deleted", "success")
     return redirect(url_for("admin"))
 
 
