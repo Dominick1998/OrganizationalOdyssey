@@ -1,5 +1,4 @@
-function createChart(employerData)
-{
+function createChart(employerData) {
     anychart.onDocumentReady(function () {
         // create data
         var data = employerData;
@@ -27,12 +26,10 @@ function createChart(employerData)
         // set the container id
         chart.container("chart_container");
 
+        // apply the recommended forceDirected layout
+        chart.layout("forceDirected");
+
         // initiate drawing the chart
         chart.draw();
     });
-
-    // set the layout type
-    function layoutType(type) {
-      chart.layout().type(type);
-    }
 }
