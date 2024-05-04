@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template, url_for, redirect, request, flash
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, EditEmployerForm, EmployerRelationForm, EmployeeRelationForm, DeleteEmployerForm, AddAdminForm, AddEmployeeForm, EditEmployeeForm, DeleteEmployeeForm
+from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, EditEmployerForm, EmployerRelationForm, EmployeeRelationForm, DeleteEmployerForm, AddAdminForm, AddEmployeeForm, EditEmployeeForm, DeleteEmployeeForm, AddInstitutionForm, EditInstitutionForm, DeleteInstitutionForm
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
@@ -91,6 +91,25 @@ class Employee(db.Model):
                                   backref="employees",
                                   overlaps="employers_employed")
 
+class Institution(db.Model):
+    __tablename__ = "institution"
+
+    id = db.Column(db.Integer, primary_key=True)
+    institution_name = db.Column(db.String(100), nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(200))
+
+    cert_awarded_to = db.relationship("Employee",
+                                             secondary="employee_institution_relation",
+                                             backref="certifying_institution")
+
+employee_institution_relation = db.Table("employee_institution_relation",
+                                         db.Column('id', db.Integer, primary_key=True),
+                                         db.Column('employee_id', db.Integer, db.ForeignKey('employee.id')),
+                                         db.Column('institution_id', db.Integer, db.ForeignKey('institution.id')),
+                                         db.Column('certification_title', db.String(100), nullable=False),
+                                         db.Column('certification_date', db.DateTime, nullable=False)
+                                         )
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -220,13 +239,18 @@ def admin():
     relation_form = EmployerRelationForm()
     employee_relation_form = EmployeeRelationForm()
     add_admin_form = AddAdminForm()
+    add_institution_form = AddInstitutionForm()
+    edit_institution_form = EditInstitutionForm()
+    delete_institution_form = DeleteInstitutionForm()
     return render_template("admin.html", new_employer_form=employer_form,
                            relation_form=relation_form,
                            employee_relation_form=employee_relation_form,
                            edit_employer_form=edit_employer_form,
                            delete_employer_form=delete_employer_form,
                            add_employee_form=add_employee_form, edit_employee_form=edit_employee_form, delete_employee_form=delete_employee_form,
-                           add_admin_form=add_admin_form)
+                           add_admin_form=add_admin_form, add_institution_form=add_institution_form,
+                           edit_institution_form=edit_institution_form,
+                           delete_institution_form=delete_institution_form)
 
 
 @app.route("/employers")
@@ -474,6 +498,68 @@ def delete_employee():
         flash("Employee deleted", "success")
     return redirect(url_for("admin"))
 
+@app.route("/add_institution", methods=["POST"])
+@login_required
+def add_institution():
+    if not current_user.admin:
+        return
+
+    form = AddInstitutionForm()
+    if form.validate_on_submit():
+        new_institution = Institution(
+            institution_name=form.institution_name.data,
+            location=form.location.data,
+            description=form.description.data
+        )
+        db.session.add(new_institution)
+        db.session.commit()
+        flash("Institution added successfully!", "success")
+    return redirect(url_for("admin"))
+
+@app.route("/edit_institution", methods=["POST"])
+@login_required
+def edit_institution():
+    if not current_user.admin:
+        return
+
+    form = EditInstitutionForm()
+    if form.validate_on_submit():
+        institution = Institution.query.filter_by(institution_name=form.institution_name.data).first()
+        if not institution:
+            flash("Institution not found", "danger")
+            return redirect(url_for("admin"))
+
+        edited = False
+        if form.location.data:
+            institution.location = form.location.data
+            edited = True
+        if form.description.data:
+            institution.description = form.description.data
+            edited = True
+        db.session.commit()
+
+        if edited:
+            flash("Institution has been successfully updated!", "success")
+    return redirect(url_for("admin"))
+
+@app.route("/delete_institution", methods=["POST"])
+@login_required
+def delete_institution():
+    if not current_user.admin:
+        return
+
+    form = DeleteInstitutionForm()
+    if form.validate_on_submit():
+        institution = Institution.query.filter_by(institution_name=form.institution_name.data).first()
+
+        if not institution:
+            flash("Institution not found", "danger")
+            return redirect(url_for("admin"))
+
+        db.session.delete(institution)
+        db.session.commit()
+        flash("Institution deleted", "success")
+    return redirect(url_for("admin"))
 
 @app.route("/add_admin", methods=["POST"])
 @login_required
