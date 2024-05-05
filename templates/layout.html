@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% if title %}
-        <title>OrginizationalOdyssey - {{ title }}</title>
+        <title>OrganizationalOdyssey - {{ title }}</title>
     {% else %}
-        <title>OrginizationalOdyssey</title>
+        <title>OrganizationalOdyssey</title>
     {% endif %}
 
     <!-- Bootstrap css -->
@@ -20,6 +20,8 @@
                     <ul class="nav col-md-4">
                         <li><a href="{{ url_for("home") }}" class="nav-link px-2 text-white">Home</a></li>
                         <li><a href="{{ url_for("employers") }}" class="nav-link px-2 text-white">Employers</a></li>
+                        <li><a href="{{ url_for("employees") }}" class="nav-link px-2 text-white">Employees</a></li>
+                        <li><a href="{{ url_for("institutions") }}" class="nav-link px-2 text-white">Institutions</a></li>
                         {% if current_user.admin == True %}
                             <li><a href="{{ url_for("admin") }}" class="nav-link px-2 text-white">Admin</a></li>
                         {%endif%}

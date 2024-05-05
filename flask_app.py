@@ -252,6 +252,19 @@ def admin():
                            edit_institution_form=edit_institution_form,
                            delete_institution_form=delete_institution_form)
 
+@app.route("/employees")
+@login_required
+def employees():
+    all_employees = Employee.query.order_by(Employee.last_name).all()
+    return render_template("employees.html", all_employees=all_employees)
+
+
+@app.route("/institutions")
+@login_required
+def institutions():
+    all_institutions = Institution.query.all()
+    return render_template("institutions.html", all_institutions=all_institutions)
+
 
 @app.route("/employers")
 @login_required
