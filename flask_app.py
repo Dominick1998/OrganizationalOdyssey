@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template, url_for, redirect, request, flash
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, EditEmployerForm, EmployerRelationForm, EmployeeRelationForm, DeleteEmployerForm, AddAdminForm, AddEmployeeForm, EditEmployeeForm, DeleteEmployeeForm, AddInstitutionForm, EditInstitutionForm, DeleteInstitutionForm
+from forms import RegistrationForm, LoginForm, SearchForm, NewEmployerForm, EditEmployerForm, EmployerRelationForm, EmployeeRelationForm, InstitutionRelationForm, DeleteEmployerForm, AddAdminForm, AddEmployeeForm, EditEmployeeForm, DeleteEmployeeForm, AddInstitutionForm, EditInstitutionForm, DeleteInstitutionForm
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
@@ -46,6 +46,14 @@ employee_relation = db.Table("employee_relation",
                              db.Column('start_date', db.DateTime, nullable=False),
                              db.Column('end_date', db.DateTime)
                              )
+
+institution_relation = db.Table("institution_relation",
+                                         db.Column('id', db.Integer, primary_key=True),
+                                         db.Column('employee_id', db.Integer, db.ForeignKey('employee.id')),
+                                         db.Column('institution_id', db.Integer, db.ForeignKey('institution.id')),
+                                         db.Column('granted_certification', db.String(100), nullable=False),
+                                         db.Column('award_date', db.DateTime, nullable=False)
+                                         )
 
 class User(UserMixin, db.Model):
     __tablename__ = "user"
@@ -100,16 +108,8 @@ class Institution(db.Model):
     description = db.Column(db.String(200))
 
     cert_awarded_to = db.relationship("Employee",
-                                             secondary="employee_institution_relation",
+                                             secondary="institution_relation",
                                              backref="certifying_institution")
-
-employee_institution_relation = db.Table("employee_institution_relation",
-                                         db.Column('id', db.Integer, primary_key=True),
-                                         db.Column('employee_id', db.Integer, db.ForeignKey('employee.id')),
-                                         db.Column('institution_id', db.Integer, db.ForeignKey('institution.id')),
-                                         db.Column('certification_title', db.String(100), nullable=False),
-                                         db.Column('certification_date', db.DateTime, nullable=False)
-                                         )
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -242,6 +242,7 @@ def admin():
     add_institution_form = AddInstitutionForm()
     edit_institution_form = EditInstitutionForm()
     delete_institution_form = DeleteInstitutionForm()
+    institution_relation_form = InstitutionRelationForm()
     return render_template("admin.html", new_employer_form=employer_form,
                            relation_form=relation_form,
                            employee_relation_form=employee_relation_form,
@@ -249,8 +250,7 @@ def admin():
                            delete_employer_form=delete_employer_form,
                            add_employee_form=add_employee_form, edit_employee_form=edit_employee_form, delete_employee_form=delete_employee_form,
                            add_admin_form=add_admin_form, add_institution_form=add_institution_form,
-                           edit_institution_form=edit_institution_form,
-                           delete_institution_form=delete_institution_form)
+                           edit_institution_form=edit_institution_form, delete_institution_form=delete_institution_form, institution_relation_form=institution_relation_form)
 
 @app.route("/employees")
 @login_required
@@ -449,6 +449,41 @@ def add_employee_relation():
         db.session.commit()
 
         flash("Employee relation added successfully!", "success")
+
+    return redirect(url_for("admin"))
+
+@app.route("/add_institution_relation", methods=["POST"])
+@login_required
+def add_institution_relation():
+    if not current_user.admin:
+        return
+
+    form = InstitutionRelationForm()
+    if form.validate_on_submit():
+        first_name = form.first_name.data
+        last_name = form.last_name.data
+        granting_institution = form.granting_institution.data
+        granted_certification = form.granted_certification.data
+        award_date = form.award_date.data
+
+        # Check if the employee exists
+        employee = Employee.query.filter_by(first_name=first_name, last_name=last_name).first()
+        if not employee:
+            flash("Employee not found", "danger")
+            return redirect(url_for("admin"))
+
+        # Check if the institution exists
+        institution = Institution.query.filter_by(institution_name=granting_institution).first()
+        if not institution:
+            flash("Institution not found", "danger")
+            return redirect(url_for("admin"))
+
+        # Create a new institution relation
+        db.session.execute(institution_relation.insert().values(employee_id=employee.id, institution_id=institution.id,
+                                                            granted_certification=granted_certification, award_date=award_date,))
+        db.session.commit()
+
+        flash("Institution relation added successfully!", "success")
 
     return redirect(url_for("admin"))
 

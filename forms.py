@@ -2,7 +2,6 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, DateField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional
 
-
 class RegistrationForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired(), Length(min=8)])
@@ -91,6 +90,14 @@ class EmployeeRelationForm(FlaskForm):
     start_date = DateField("Start Date", validators=[DataRequired()], format='%Y-%m-%d')
     end_date = DateField("End Date (Optional)", format='%Y-%m-%d', validators=[Optional()])
     submit = SubmitField('Add Employee Relation')
+
+class InstitutionRelationForm(FlaskForm):
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[DataRequired()])
+    granting_institution = StringField('Institution', validators=[DataRequired()])
+    granted_certification = StringField('Granted Certification', validators=[DataRequired()])
+    award_date = DateField('Award Date', format='%Y-%m-%d', validators=[DataRequired()])
+    submit = SubmitField('Submit')
 
 class AddAdminForm(FlaskForm):
     email_address = StringField("Email Address", validators=[DataRequired()])
