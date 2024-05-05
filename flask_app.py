@@ -8,35 +8,37 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_mail import Mail, Message
 from cryptography.fernet import Fernet
 
+# Initialize the Flask application
 app = Flask(__name__)
 
-
-app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505"#os.environ.get("SECRET_KEY")
-app.config['MAIL_SERVER'] = "smtp.gmail.com."
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com"
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw"#os.environ.get("MAIL_PASSWORD")
-app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ="#os.environ.get("FERNET_KEY")
+# Configuration settings for the application
+app.config["SECRET_KEY"] = "c6d2f9789a32a64e8d12d42d2c955505"#os.environ.get("SECRET_KEY")  # Secret key for cryptographic operations
+app.config['MAIL_SERVER'] = "smtp.gmail.com." # SMTP server for sending mails
+app.config['MAIL_PORT'] = 465 # SMTP port for mail server
+app.config['MAIL_USERNAME'] = "organizationalodyssey@gmail.com" # Email username for sending emails
+app.config['MAIL_USE_TLS'] = False # Use TLS for email security (set to True if using TLS)
+app.config['MAIL_USE_SSL'] = True # Use SSL for email security
+app.config['MAIL_PASSWORD'] = "pgjdzozsuadatvzw"#os.environ.get("MAIL_PASSWORD") # Email password for SMTP authentication
+app.config["FERNET_KEY"] = "VvPY8Yqf8U42_CyPWJwaDuHu4r-8LKcVwGgTJT3j_NQ="#os.environ.get("FERNET_KEY") # Key for encrypting tokens
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://{username}:{password}@{hostname}/{databasename}".format(
     username="calebmcquay",
     password="OrganizationalOdyssey",
     hostname="calebmcquay.mysql.pythonanywhere-services.com",
     databasename="calebmcquay$CELDV"
-)
+    # Database URI for SQLAlchemy
+    
+# Initialize Flask extensions
+db = SQLAlchemy(app) # For ORM capabilities
+bcrypt = Bcrypt(app) # For password hashing
+mail = Mail(app) # For email operations
+fernet = Fernet(app.config["FERNET_KEY"]) # For token encryption
+login_manager = LoginManager(app) # For handling user sessions
 
-db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
-mail = Mail(app)
-fernet = Fernet(app.config["FERNET_KEY"])
-login_manager = LoginManager(app)
-
-
+# Define database relationship tables and models
 employer_relation = db.Table("employer_relation",
                              db.Column('parent_id', db.Integer, db.ForeignKey('employer.id')),
                              db.Column('child_id', db.Integer, db.ForeignKey('employer.id'))
-                             )
+                             ) # Relation table for employer hierarchy
 
 employee_relation = db.Table("employee_relation",
                              db.Column('job_id', db.Integer, primary_key=True),
@@ -54,7 +56,7 @@ institution_relation = db.Table("institution_relation",
                                          db.Column('granted_certification', db.String(100), nullable=False),
                                          db.Column('award_date', db.DateTime, nullable=False)
                                          )
-
+# Models for the ORM
 class User(UserMixin, db.Model):
     __tablename__ = "user"
 
@@ -63,6 +65,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(60), nullable=False)
     admin = db.Column(db.Boolean, nullable=False, default=False)
     email_confirmed = db.Column(db.Boolean, nullable=False, default=False)
+        # Model representing a user
 
 class Employer(db.Model):
     __tablename__ = "employer"
@@ -77,6 +80,7 @@ class Employer(db.Model):
                                       primaryjoin=("employer_relation.c.parent_id == Employer.id"),
                                       secondaryjoin=("employer_relation.c.child_id == Employer.id"),
                                       backref="parent_employers")
+        # Model representing an employer, includes self-referencing relationship to handle hierarchical structures
     has_employed = db.relationship("Employee",
                                    secondary="employee_relation",
                                    primaryjoin=("Employer.id == employee_relation.c.employer_id"),
@@ -114,8 +118,9 @@ class Institution(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+    # Callback used by Flask-Login to load a user from the session
 
-
+# Application routes for handling requests
 @app.route('/')
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -135,6 +140,7 @@ def login():
             flash(f"invalid credentials", "danger")
             return redirect(url_for("login"))
     return render_template("login.html", title="Log in", form=form)
+        # Route for handling login functionality
 
 
 @app.route("/logout")
@@ -142,6 +148,7 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for("login"))
+        # Route to handle user logout; it clears the user session and redirects to the login page.
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -171,6 +178,7 @@ def register():
         flash(f"Thank you for signing up! Please check your email to confirm your account", "success")
         return redirect(url_for("login"))
     return render_template("register.html", title="Registration", form=form)
+        # Route to handle user registration, including validation, password hashing, and email confirmation setup.
 
 
 @app.route("/home")
@@ -178,6 +186,7 @@ def register():
 def home():  # put application's code here
     form = SearchForm()
     return render_template("home.html", form=form, current_user=current_user)
+        # The home page route that requires user login; displays a search form and user info.
 
 
 @app.route("/confirm/<token>")
@@ -188,6 +197,7 @@ def confirm_account(token):
     db.session.commit()
     flash(f"Your account has been successfully registered!", "success")
     return redirect(url_for("login"))
+        # Route to handle email confirmation; decrypts the token to verify and activate the user account.
 
 
 @app.route("/visualization/<root_node>", methods=["GET", "POST"])
@@ -222,8 +232,9 @@ def visualization(root_node=None):
     traverse_tree(employer, data, visited_nodes)
 
     return render_template("visualization.html", employer=employer, data=data, end_time=end_time)
+        # Route to visualize the hierarchical structure of employers or organizational units.
 
-
+# Additional routes for administrative functions, employer and employee management
 @app.route("/admin")
 @login_required
 def admin():
@@ -308,7 +319,7 @@ def traverse_tree(root_employer, data, visited_nodes):
                                   "to_name": root_employer.employer_name})
         traverse_tree(parent_employer, data, visited_nodes)
 
-
+# Define CRUD operations for managing employer information
 @app.route("/add_employer", methods=["POST"])
 @login_required
 def add_employer():
@@ -321,7 +332,8 @@ def add_employer():
         if valid_employer:
             flash(f"Employer with name {valid_employer.employer_name} already exists", "danger")
             return redirect(url_for("admin"))
-
+            
+        # Create new employer record
         new_employer = Employer(
             employer_name=form.employer_name.data,
             headquarters_address=form.headquarters_address.data,
@@ -333,6 +345,7 @@ def add_employer():
         db.session.commit()
         flash("Employer added successfully!", "success")
     return redirect(url_for("admin"))
+        # Return to the admin page to handle potential errors or retry submissions
 
 
 @app.route("/edit_employer", methods=["POST"])
@@ -381,7 +394,7 @@ def delete_employer():
         if not employer:
             flash(f"{form.employer_name.data} does not exist", "danger")
             return redirect(url_for("admin"))
-
+        # Delete employer record and handle relationships
         if employer.child_employers:
             flash(f"Cannot delete employer with child relationships", "danger")
             return redirect(url_for("admin"))
@@ -391,7 +404,7 @@ def delete_employer():
         flash(f"Employer deleted", "success")
     return redirect(url_for("admin"))
 
-
+# Routes for handling employee relationships with employers
 @app.route("/add_employer_relation", methods=["POST"])
 @login_required
 def add_employer_relation():
@@ -400,6 +413,7 @@ def add_employer_relation():
 
     form = EmployerRelationForm()
     if form.validate_on_submit():
+                # Fetch and verify employer and employee existence
         parent_employer = Employer.query.filter_by(employer_name=form.parent_name.data).first()
         child_employer = Employer.query.filter_by(employer_name=form.child_name.data).first()
         if not parent_employer or not child_employer:
@@ -409,6 +423,7 @@ def add_employer_relation():
         if child_employer in parent_employer.child_employers:
             flash("Relation already exits", "danger")
             return redirect(url_for("admin"))
+                    # Create a new job record linking employee to employer
 
         parent_employer.child_employers.append(child_employer)
         db.session.commit()
@@ -452,6 +467,7 @@ def add_employee_relation():
 
     return redirect(url_for("admin"))
 
+# Adding administrative capabilities to manage institutions and their relationships
 @app.route("/add_institution_relation", methods=["POST"])
 @login_required
 def add_institution_relation():
@@ -460,6 +476,7 @@ def add_institution_relation():
 
     form = InstitutionRelationForm()
     if form.validate_on_submit():
+                # Create new institution object from form data
         first_name = form.first_name.data
         last_name = form.last_name.data
         granting_institution = form.granting_institution.data
@@ -563,6 +580,7 @@ def add_institution():
         db.session.commit()
         flash("Institution added successfully!", "success")
     return redirect(url_for("admin"))
+        # This route handles the addition of new institutions, validating user input and storing it in the database.
 
 @app.route("/edit_institution", methods=["POST"])
 @login_required
@@ -576,6 +594,7 @@ def edit_institution():
         if not institution:
             flash("Institution not found", "danger")
             return redirect(url_for("admin"))
+                    # Update institution details
 
         edited = False
         if form.location.data:
@@ -589,6 +608,7 @@ def edit_institution():
         if edited:
             flash("Institution has been successfully updated!", "success")
     return redirect(url_for("admin"))
+        # This route allows administrators to update existing institutions with new data provided through a form.
 
 @app.route("/delete_institution", methods=["POST"])
 @login_required
@@ -608,6 +628,7 @@ def delete_institution():
         db.session.commit()
         flash("Institution deleted", "success")
     return redirect(url_for("admin"))
+        # This route manages the deletion of institutions from the database, ensuring all related data is also handled appropriately.
 
 @app.route("/add_admin", methods=["POST"])
 @login_required
@@ -627,7 +648,7 @@ def add_admin():
         flash("New admin successfully added", "success")
 
     return redirect(url_for("admin"))
-
+    # This route enables the promotion of existing users to admin status, enhancing their privileges within the application.
 
 if __name__ == "__main__":
     app.run()
