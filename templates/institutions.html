@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h1 class="border-bottom mb-4">All Institutions</h1>
+    <div class="container" style="height: 80vh; overflow-y: auto;" data-spy="scroll">
+        <table id="institution_table" class="table table-hover">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)" scope="col"><a href="#" class="text-dark" >Institution</a></th>
+                    <th scope="col"><a href="#" class="text-dark" >Location</a></th>
+                    <th scope="col"><a href="#" class="text-dark" >Description</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for institution in all_institutions %}
+                    <tr>
+                        <td><a class="text-dark" href="{{ url_for('visualization', root_node=institution.institution_name) }}">{{ institution.institution_name }}</a></td>
+                        <td>{{ institution.location }}</td>
+                        <td>{{ institution.description }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function sortTable(n) {
+          var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+          table = document.getElementById("institution_table");
+          switching = true;
+          dir = "asc";
+          while (switching) {
+            switching = false;
+            rows = table.rows;
+            for (i = 1; i < (rows.length - 1); i++) {
+              shouldSwitch = false;
+              x = rows[i].getElementsByTagName("TD")[n];
+              y = rows[i + 1].getElementsByTagName("TD")[n];
+              if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                  shouldSwitch= true;
+                  break;
+                }
+              } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                  shouldSwitch = true;
+                  break;
+                }
+              }
+            }
+            if (shouldSwitch) {
+              rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+              switching = true;
+              switchcount ++;
+            } else {
+              if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+              }
+            }
+          }
+        }
+    </script>
+{% endblock content %}
