@@ -199,38 +199,97 @@ def confirm_account(token):
     return redirect(url_for("login"))
         # Route to handle email confirmation; decrypts the token to verify and activate the user account.
 
+from collections import defaultdict
+
 @app.route("/visualization/<root_node>", methods=["GET", "POST"])
-@app.route("/visualization", methods=["POST"])
+@app.route("/visualization", methods=["GET", "POST"])
 @login_required
 def visualization(root_node=None):
+    # Initialize form, data, and visited nodes set
     form = SearchForm()
-    if root_node:
-        employer = Employer.query.filter_by(employer_name=root_node).first()
-    else:
-        employer = Employer.query.filter_by(employer_name=form.search.data).first()
+    data = {"nodes": [], "edges": []}
+    visited_nodes = set()
 
-    if not employer:
-        flash(f"Selected employer not found", "danger")
+    # Fetch start point based on URL parameter or form input
+    if root_node:
+        start_point = fetch_start_point(root_node)
+    else:
+        start_point = fetch_start_point(form.search.data)
+
+    if not start_point:
+        flash("Start point not found", "danger")
         return redirect(url_for("home"))
 
-    data = {"nodes": [], "edges": []}
-    visited_nodes = []
+    # Traverse the tree from the start point and fill data with nodes and edges
+    traverse_tree(start_point, data, visited_nodes)
+    return render_template("visualization.html", data=data)
 
-    end_time = employer.end_date
-    end_time = end_time.strftime("%Y-%m-%d") if end_time is not None else "Active Company"
+# Function to fetch start point entity from database
+def fetch_start_point(identifier):
+    entity = (Employer.query.filter_by(employer_name=identifier).first() or
+              Employee.query.filter_by(first_name=identifier.split()[0], last_name=identifier.split()[-1]).first() or
+              Institution.query.filter_by(institution_name=identifier).first())
+    return entity
 
-    description = employer.description if employer.description != "" else "No Description"
-    description = (description[:100] + "...") if len(description) > 100 else description
-    data.get("nodes").append({"id": employer.id,
-                              "name": employer.employer_name,
-                              "address": employer.headquarters_address,
-                              "start_date": employer.start_date.strftime("%Y-%m-%d"),
-                              "end_date": end_time,
-                              "description": description,
-                              "fill": "purple", "shape": "diamond"})
-    traverse_tree(employer, data, visited_nodes)
+# Function to traverse the tree from a given node
+def traverse_tree(node, data, visited_nodes):
+    if node.id in visited_nodes:
+        return
+    visited_nodes.add(node.id)
 
-    return render_template("visualization.html", employer=employer, data=data, end_time=end_time)
+    # Add node to data based on its type and traverse related nodes
+    if isinstance(node, Employer):
+        add_employer_node(node, data)
+        traverse_employer_relations(node, data, visited_nodes)
+
+    elif isinstance(node, Employee):
+        add_employee_node(node, data)
+        traverse_employee_relations(node, data, visited_nodes)
+
+    elif isinstance(node, Institution):
+        add_institution_node(node, data)
+        traverse_institution_relations(node, data, visited_nodes)
+
+# Function to traverse employer relations
+def traverse_employer_relations(employer, data, visited_nodes):
+    for child in employer.child_employers:
+        data['edges'].append({"from": employer.id, "to": child.id, "title": "Employer Relation"})
+        traverse_tree(child, data, visited_nodes)
+    
+    for record in employer.hasEmployed:
+        employee = Employee.query.get(record.theEmployee)
+        if employee:
+            employmentRecord = EmployeeEmploymentRecord.query.filter_by(theEmployee=record.theEmployee).first()
+            title = employmentRecord.jobTitle if employmentRecord else "Unknown Job Title"
+            data['edges'].append({"from": employer.id, "to": employee.id, "kind": "Employee Employment Record", "title": title})
+            traverse_tree(employee, data, visited_nodes)
+
+# Function to traverse employee relations
+def traverse_employee_relations(employee, data, visited_nodes):
+    for record in employee.employers:
+        employer = Employer.query.get(record.theEmployer)
+        if employer:
+            traverse_tree(employer, data, visited_nodes)
+    
+    certifications = EmployeeCertification.query.filter_by(certAwardedTo=employee.id).all()
+    for certification in certifications:
+        institution = Institution.query.get(certification.grantingInstitution)
+        certification_info = Certification.query.get(certification.grantedCertification)
+        if institution and certification_info:
+            title = f"Certified in {certification_info.CertificationName} on {certification.awardDate.strftime('%Y-%m-%d')}"
+            data['edges'].append({"from": institution.id, "to": employee.id, "kind": "Certification", "title": title})
+            traverse_tree(institution, data, visited_nodes)
+
+# Function to traverse institution relations
+def traverse_institution_relations(institution, data, visited_nodes):
+    certified_employees = EmployeeCertification.query.filter_by(grantingInstitution=institution.id).all()
+    for record in certified_employees:
+        employee = Employee.query.get(record.certAwardedTo)
+        certification_info = Certification.query.get(record.grantedCertification)
+        if employee and certification_info:
+            title = f"Granted {certification_info.CertificationName} on {record.awardDate.strftime('%Y-%m-%d')}"
+            data['edges'].append({"from": institution.id, "to": employee.id, "kind": "Certification", "title": title})
+            traverse_tree(employee, data, visited_nodes)
         # Route to visualize the hierarchical structure of employers or organizational units.
 
 # Additional routes for administrative functions, employer and employee management
