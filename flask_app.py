@@ -253,7 +253,7 @@ def visualization(root_node=None):
     if institution:
         # Fetch institution data and add it to the 'data' dictionary
         data.get("nodes").append({"id": institution.id,
-                                  "intitution_name": institution.name,
+                                  "institution_name": institution.name,
                                   # Add other institution attributes here
                                   "kind": "Institution",
                                   "fill": "green", "shape": "rectangle"})
