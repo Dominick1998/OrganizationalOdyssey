@@ -199,6 +199,8 @@ def confirm_account(token):
     return redirect(url_for("login"))
         # Route to handle email confirmation; decrypts the token to verify and activate the user account.
 
+from flask import render_template
+
 @app.route("/visualization/<root_node>", methods=["GET", "POST"])
 @app.route("/visualization", methods=["POST"])
 @login_required
@@ -206,31 +208,58 @@ def visualization(root_node=None):
     form = SearchForm()
     if root_node:
         employer = Employer.query.filter_by(employer_name=root_node).first()
+        employee = Employee.query.filter_by(name=root_node).first()  
+        institution = Institution.query.filter_by(name=root_node).first()  
     else:
         employer = Employer.query.filter_by(employer_name=form.search.data).first()
+        employee = Employee.query.filter_by(name=form.search.data).first()  
+        institution = Institution.query.filter_by(name=form.search.data).first()  
 
-    if not employer:
-        flash(f"Selected employer not found", "danger")
+    if not employer and not employee and not institution:  
+        flash(f"Selected entity not found", "danger")  
         return redirect(url_for("home"))
 
     data = {"nodes": [], "edges": []}
     visited_nodes = []
 
-    end_time = employer.end_date
-    end_time = end_time.strftime("%Y-%m-%d") if end_time is not None else "Active Company"
+    if employer:
+        end_time = employer.end_date
+        end_time = end_time.strftime("%Y-%m-%d") if end_time is not None else "Active Company"
 
-    description = employer.description if employer.description != "" else "No Description"
-    description = (description[:100] + "...") if len(description) > 100 else description
-    data.get("nodes").append({"id": employer.id,
-                              "name": employer.employer_name,
-                              "address": employer.headquarters_address,
-                              "start_date": employer.start_date.strftime("%Y-%m-%d"),
-                              "end_date": end_time,
-                              "description": description,
-                              "fill": "purple", "shape": "diamond"})
-    traverse_tree(employer, data, visited_nodes)
+        description = employer.description if employer.description != "" else "No Description"
+        description = (description[:100] + "...") if len(description) > 100 else description
+        data.get("nodes").append({"id": employer.id,
+                                  "name": employer.employer_name,
+                                  "address": employer.headquarters_address,
+                                  "start_date": employer.start_date.strftime("%Y-%m-%d"),
+                                  "end_date": end_time,
+                                  "description": description,
+                                  "kind": "Employer",
+                                  "fill": "purple", "shape": "diamond"})
 
-    return render_template("visualization.html", employer=employer, data=data, end_time=end_time)
+        traverse_tree(employer, data, visited_nodes)
+
+    if employee:
+        # Fetch employee data and add it to the 'data' dictionary
+        data.get("nodes").append({"id": employee.id,
+                                  "firs_name": employee.fist_name,
+                                  "last_name" : employee.last_name,
+                                  "email": employee.email,
+                                  "phone_number": employee.phone_number("%Y-%m-%d"),
+                                  # Add other employee attributes here
+                                  "kind": "Employee",
+                                  "fill": "blue", "shape": "circle"})
+
+    if institution:
+        # Fetch institution data and add it to the 'data' dictionary
+        data.get("nodes").append({"id": institution.id,
+                                  "name": institution.name,
+                                  # Add other institution attributes here
+                                  "kind": "Institution",
+                                  "fill": "green", "shape": "rectangle"})
+
+    return render_template("visualization.html", employer=employer, employee=employee, institution=institution, data=data)
+
         # Route to visualize the hierarchical structure of employers or organizational units.
 
 # Additional routes for administrative functions, employer and employee management

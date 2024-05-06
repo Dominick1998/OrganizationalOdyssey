@@ -14,22 +14,12 @@
         <div class="col-lg-4">
             <div class="justify-content-left" style="font-size:1.4em;overflow-y: auto;height:32em">
                 <div class="pb-5">
-                {% if entity_type == 'Employer' %}
                 Employer:   {{ employer.employer_name }} </br>
                 Address: {{ employer.headquarters_address }} </br>
                 Start Date: {{ employer.start_date.strftime("%Y-%m-%d") }} </br>
                 End Date: {{ end_time }} </br>
-                {% elif entity_type == 'Employee' %}
-                Employee: {{ employee.name }} </br>
-                Email: {{ employee.email_address }} </br>
-                Phone: {{ employee.phone_number }} </br>
-                Address: {{ employee.employee_address }} </br>
-                {% elif entity_type == 'Institution' %}
-                Institution: {{ institution.name }} </br>
-                Address: {{ institution.address }} </br>
-                {% endif %}
                 </div>
-                {% if entity_type == 'Employer' and employer.description != "" %}
+                {% if employer.description != "" %}
                 Description: {{ employer.description }}
                 {% endif %}
             </div>
