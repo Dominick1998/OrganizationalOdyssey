@@ -1,22 +1,48 @@
 {% extends 'layout.html' %}
 {% block content %}
-<head>
-    <script src="https://cdn.anychart.com/releases/8.11.1/js/anychart-base.min.js" type="text/javascript"></script>
-    <script src="https://cdn.anychart.com/releases/8.11.1/js/anychart-graph.min.js"></script>
-    <script src="{{ url_for('static', filename='visualization.js') }}"></script>
-</head>
-<body>
+    <head>
+        <script src="https://cdn.anychart.com/releases/8.11.1/js/anychart-base.min.js" type="text/javascript"></script>
+        <script src="https://cdn.anychart.com/releases/8.11.1/js/anychart-graph.min.js"></script>
+        <script src="{{url_for('static', filename='visualization.js')}}"></script>
+    </head>
+
+    <body>
     <h1 class="border-bottom">Visualization</h1>
+
     <div class="row">
-        <div class="col-lg-4" id="infoPanel" style="font-size:1.4em; overflow-y:auto; height:32em">
-            <p>Select a node to view details.</p>
+
+        <div class="col-lg-4">
+            <div class="justify-content-left" style="font-size:1.4em;overflow-y: auto;height:32em">
+                <div class="pb-5">
+                {% if entity_type == 'Employer' %}
+                Employer:   {{ employer.employer_name }} </br>
+                Address: {{ employer.headquarters_address }} </br>
+                Start Date: {{ employer.start_date.strftime("%Y-%m-%d") }} </br>
+                End Date: {{ end_time }} </br>
+                {% elif entity_type == 'Employee' %}
+                Employee: {{ employee.name }} </br>
+                Email: {{ employee.email_address }} </br>
+                Phone: {{ employee.phone_number }} </br>
+                Address: {{ employee.employee_address }} </br>
+                {% elif entity_type == 'Institution' %}
+                Institution: {{ institution.name }} </br>
+                Address: {{ institution.address }} </br>
+                {% endif %}
+                </div>
+                {% if entity_type == 'Employer' and employer.description != "" %}
+                Description: {{ employer.description }}
+                {% endif %}
+            </div>
         </div>
+
         <div class="col-lg-8">
             <div class="d-flex justify-content-center" style="height:45em">
-                <div id="chart_container" class="w-100 p-3" style="background-color: #eee;"></div>
+            <div id="chart_container" class="w-100 p-3" style="background-color: #eee;"></div>
             </div>
-            <script>createChart({{ data|tojson|safe }});</script>
+            <script>createChart({{data|tojson}})</script>
         </div>
+
     </div>
-</body>
+    </body>
+
 {% endblock content %}
