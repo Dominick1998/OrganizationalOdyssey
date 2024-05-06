@@ -1,98 +1,73 @@
-function createChart(employerData) {
+function createChart(visualizationData) {
+    console.log("Visualization data:", visualizationData);
     anychart.onDocumentReady(function () {
-        // create data
-        var employerChart = createGraph(employerData, "employer_chart_container");
-        // set layout for employer chart
-        layoutType(employerChart, "forceDirected");
-
-        // create employee chart
-        var employeeChart = createGraph(employeeData, "employee_chart_container");
-        // set layout for employee chart
-        layoutType(employeeChart, "forceDirected");
-
-        // create institutions chart
-        var institutionsChart = createGraph(institutionsData, "institutions_chart_container");
-        // set layout for institutions chart
-        layoutType(institutionsChart, "forceDirected");
-
-        // create employee-employer relationships
-        createRelations(employeeEmployerRelations, employeeChart, employerChart, institutionsChart);
+        var chart = initializeChart(visualizationData);
+        bindNodeClickEvent(chart, visualizationData);
+        drawChart(chart);
+        console.log("Chart created successfully");
     });
 }
 
-function createGraph(data, containerId) {
-        // create a chart and set the data
-        var chart = anychart.graph(data);
+function initializeChart(visualizationData) {
+    var chart = anychart.graph(visualizationData);
+    chart.edges().arrows().enabled(true);
+    chart.nodes().labels().enabled(true).format("{%name}" + " , " + "{%kind}" + " , " + "ID=(" + "{%id}" + ")").fontSize(12).fontWeight(600);
+    chart.tooltip().useHtml(true);
+    chart.nodes().tooltip().format("{%name}");
+    chart.edges().tooltip().format("Parent: {%from} -> Child: {%to} ({%title})");
+    chart.container('chart_container');
+    return chart;
+}
 
-        chart.edges().arrows().enabled(true);
-
-        // enable labels of nodes
-        chart.nodes().labels().enabled(true);
-
-        // configure labels of nodes
-        chart.nodes().labels().format("{%name}");
-        chart.nodes().labels().fontSize(12);
-        chart.nodes().labels().fontWeight(600);
-
-        chart.tooltip().useHtml(true);
-        var nodeFormat = "Name: {%name} </br> Address: {%address} " +
-                                "</br> Start Date: {%start_date} </br> End Date: {%end_date} " +
-                                "</br> Description: {%description}";
-        chart.nodes().tooltip().format(nodeFormat);
-        chart.edges().tooltip().format("From: {%from_name} </br> To: {%to_name}");
-
-        // set the container id
-        chart.container(containerId);
-
-        // apply the recommended forceDirected layout
-        chart.layout("forceDirected");
-
-        // initiate drawing the chart
-        chart.draw();
-
-        return chart;
-    }
-
-    function layoutType(chart, type) {
-        chart.layout().type(type);
-    }
-    function createRelations(relationsData, employeeChart, employerChart, institutionsChart) {
-        var relations = anychart.data.tree(relationsData, "as-tree");
-    
-        var employeeToInstitutionMapping = {};
-        var employerToInstitutionMapping = {};
-    
-        relations.traverse(function (item) {
-            if (item.get("from_type") === "employee") {
-                var employeeId = item.get("from");
-                var institutionId = item.get("to");
-                if (!employeeToInstitutionMapping[employeeId]) {
-                    employeeToInstitutionMapping[employeeId] = [];
-                }
-                employeeToInstitutionMapping[employeeId].push(institutionId);
-            } else if (item.get("from_type") === "employer") {
-                var employerId = item.get("from");
-                var institutionId = item.get("to");
-                if (!employerToInstitutionMapping[employerId]) {
-                    employerToInstitutionMapping[employerId] = [];
-                }
-                employerToInstitutionMapping[employerId].push(institutionId);
+function bindNodeClickEvent(chart, visualizationData) {
+    chart.listen("click", function(e) {
+        var tag = e.domTarget.tag;
+        if (tag && tag.type === 'node') {
+            console.log("Node clicked:", tag);
+            var node = findNodeById(visualizationData.nodes, tag.id);
+            console.log("Found Node:", node);
+            if (node) {
+                updateInfoPanel(node);
+            } else {
+                console.log("Node not found for ID:", tag.id);
             }
-        });
-    
-        // Create employee to institution edges
-        for (var employeeId in employeeToInstitutionMapping) {
-            var institutionIds = employeeToInstitutionMapping[employeeId];
-            institutionIds.forEach(function (institutionId) {
-                employeeChart.append(employeeId, institutionId);
-            });
+        } else {
+            console.log("No node clicked or non-node element clicked");
         }
-    
-        // Create institution to employer edges
-        for (var employerId in employerToInstitutionMapping) {
-            var institutionIds = employerToInstitutionMapping[employerId];
-            institutionIds.forEach(function (institutionId) {
-                institutionsChart.append(institutionId, employerId);
-            });
+    });
+}
+
+function findNodeById(nodes, id) {
+    return nodes.find(node => node.id == id);
+}
+
+function drawChart(chart) {
+    chart.draw();
+}
+
+function updateInfoPanel(node) {
+    console.log("updateInfoPanel called with node:", node);
+    var infoPanel = document.getElementById('infoPanel');
+    var content = generateInfoContent(node);
+    infoPanel.innerHTML = content;
+    console.log("infoPanel content updated:", content);
+}
+
+function generateInfoContent(node) {
+    var content = `<div class="pb-5">
+                        <strong>${node.kind}: ${node.name}</strong><br>`;
+    if (node.kind === "Employer") {
+        content += `Address: ${node.headquarters_address}<br>
+                    Start Date: ${node.start_date}<br>
+                    End Date: ${node.end_date || 'Active'}<br>`;
+        if (node.description) {
+            content += `Description: ${node.description}`;
         }
+    } else if (node.kind === "Employee") {
+        content += `Email: ${node.email_address}<br>
+                    Phone: ${node.phone_number}<br>
+                    Address: ${node.employee_address}`;
     }
+    content += `</div>`;
+    return content;
+}
