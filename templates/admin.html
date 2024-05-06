@@ -22,6 +22,9 @@
         <li><a data-toggle="tab" href="#editinstitution" class="btn btn-outline-info border">Edit Institution</a></li>
         <li><a data-toggle="tab" href="#deleteinstitution" class="btn btn-outline-info border">Delete Institution</a></li>
         <li><a data-toggle="tab" href="#addinstitutionrelation" class="btn btn-outline-info border">Add Institution Relation</a></li>
+        <li><a data-toggle="tab" href="#deleteemployerrelation" class="btn btn-outline-info border">Delete Employer Relation</a></li>
+        <li><a data-toggle="tab" href="#deleteemployeerelation" class="btn btn-outline-info border">Delete Employee Relation</a></li>
+        <li><a data-toggle="tab" href="#deleteinstitutionrelation" class="btn btn-outline-info border">Delete Institution Relation</a></li>
         <li><a data-toggle="tab" href="#addadmin" class="btn btn-outline-info border">Add Admin</a></li>
     </ul>
 
@@ -478,6 +481,71 @@
                 </div>
                 <div class="form-group mt-3 mb-3">
                     {{ institution_relation_form.submit(class="btn btn-outline-info border rounded") }}
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="deleteemployerrelation" class="tab-pane">
+        <div class="border shadow p-3 mb-5 bg-white rounded">
+            <form method="POST" action="{{ url_for('delete_employer_relation') }}">
+                {{ delete_employer_relation_form.hidden_tag() }}
+                <legend class="border-bottom mb-4">Delete Employer-Employer Relation</legend>
+                <div class="form-group">
+                    {{ delete_employer_relation_form.parent_name.label(class="form-control-label") }}
+                    {{ delete_employer_relation_form.parent_name(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group">
+                    {{ delete_employer_relation_form.child_name.label(class="form-control-label") }}
+                    {{ delete_employer_relation_form.child_name(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group mt-3 mb-3">
+                    {{ delete_employer_relation_form.submit(class="btn btn-outline-info border rounded") }}
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="deleteemployeerelation" class="tab-pane">
+        <div class="border shadow p-3 mb-5 bg-white rounded">
+            <form method="POST" action="{{ url_for('delete_employee_relation') }}">
+                {{ delete_employee_relation_form.hidden_tag() }}
+                <legend class="border-bottom mb-4">Delete Employee-Employer Relation</legend>
+                <div class="form-group">
+                    {{ institution_relation_form.first_name.label(class="form-control-label") }}
+                    {{ institution_relation_form.first_name(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group">
+                    {{ institution_relation_form.last_name.label(class="form-control-label") }}
+                    {{ institution_relation_form.last_name(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group">
+                    {{ delete_employee_relation_form.employer_name.label(class="form-control-label") }}
+                    {{ delete_employee_relation_form.employer_name(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group mt-3 mb-3">
+                    {{ delete_employee_relation_form.submit(class="btn btn-outline-info border rounded") }}
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="deleteinstitutionrelation" class="tab-pane">
+        <div class="border shadow p-3 mb-5 bg-white rounded">
+            <form method="POST" action="{{ url_for('delete_institution_relation') }}">
+                {{ delete_institution_relation_form.hidden_tag() }}
+                <legend class="border-bottom mb-4">Delete Institution-Employee Relation</legend>
+                <div class="form-group">
+                    {{ institution_relation_form.first_name.label(class="form-control-label") }}
+                    {{ institution_relation_form.first_name(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group">
+                    {{ institution_relation_form.last_name.label(class="form-control-label") }}
+                    {{ institution_relation_form.last_name(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group">
+                    {{ delete_institution_relation_form.institution_name.label(class="form-control-label") }}
+                    {{ delete_institution_relation_form.institution_name(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group mt-3 mb-3">
+                    {{ delete_institution_relation_form.submit(class="btn btn-outline-info border rounded") }}
                 </div>
             </form>
         </div>
