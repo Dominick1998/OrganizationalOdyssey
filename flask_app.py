@@ -199,7 +199,6 @@ def confirm_account(token):
     return redirect(url_for("login"))
         # Route to handle email confirmation; decrypts the token to verify and activate the user account.
 
-from flask import render_template
 
 @app.route("/visualization/<root_node>", methods=["GET", "POST"])
 @app.route("/visualization", methods=["POST"])
