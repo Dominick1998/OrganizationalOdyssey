@@ -1,3 +1,4 @@
+// Initializes the chart creation process by setting up the document to be ready for visualization
 function createChart(visualizationData) {
     console.log("Visualization data:", visualizationData);
     anychart.onDocumentReady(function () {
@@ -8,6 +9,7 @@ function createChart(visualizationData) {
     });
 }
 
+// Initializes the graph chart with provided data using AnyChart library
 function initializeChart(visualizationData) {
     var chart = anychart.graph(visualizationData);
     chart.edges().arrows().enabled(true);
@@ -19,6 +21,7 @@ function initializeChart(visualizationData) {
     return chart;
 }
 
+// Binds click events to nodes in the chart, allowing for further interaction
 function bindNodeClickEvent(chart, visualizationData) {
     chart.listen("click", function(e) {
         var tag = e.domTarget.tag;
@@ -37,14 +40,17 @@ function bindNodeClickEvent(chart, visualizationData) {
     });
 }
 
+// Finds a node in the array of nodes by its ID
 function findNodeById(nodes, id) {
     return nodes.find(node => node.id == id);
 }
 
+// Renders the chart onto the page
 function drawChart(chart) {
     chart.draw();
 }
 
+// Updates the information panel with details of the selected node
 function updateInfoPanel(node) {
     console.log("updateInfoPanel called with node:", node);
     var infoPanel = document.getElementById('infoPanel');
@@ -53,6 +59,7 @@ function updateInfoPanel(node) {
     console.log("infoPanel content updated:", content);
 }
 
+// Generates HTML content for displaying detailed information about a node
 function generateInfoContent(node) {
     var content = `<div class="pb-5">
                         <strong>${node.kind}: ${node.name}</strong><br>`;
