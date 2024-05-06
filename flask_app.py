@@ -208,12 +208,12 @@ def visualization(root_node=None):
     form = SearchForm()
     if root_node:
         employer = Employer.query.filter_by(employer_name=root_node).first()
-        employee = Employee.query.filter_by(name=root_node).first()  
-        institution = Institution.query.filter_by(name=root_node).first()  
+        employee = Employee.query.filter_by(employee=root_node).first()  
+        institution = Institution.query.filter_by(Institution=root_node).first()  
     else:
         employer = Employer.query.filter_by(employer_name=form.search.data).first()
-        employee = Employee.query.filter_by(name=form.search.data).first()  
-        institution = Institution.query.filter_by(name=form.search.data).first()  
+        employee = Employee.query.filter_by(employee=form.search.data).first()  
+        institution = Institution.query.filter_by(institution=form.search.data).first()  
 
     if not employer and not employee and not institution:  
         flash(f"Selected entity not found", "danger")  
