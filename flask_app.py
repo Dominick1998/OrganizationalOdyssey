@@ -242,10 +242,10 @@ def visualization(root_node=None):
     if employee:
         # Fetch employee data and add it to the 'data' dictionary
         data.get("nodes").append({"id": employee.id,
-                                  "firs_name": employee.fist_name,
+                                  "first_name": employee.fist_name,
                                   "last_name" : employee.last_name,
                                   "email": employee.email,
-                                  "phone_number": employee.phone_number("%Y-%m-%d"),
+                                  "phone_number": employee.phone_number,
                                   # Add other employee attributes here
                                   "kind": "Employee",
                                   "fill": "blue", "shape": "circle"})
@@ -253,7 +253,7 @@ def visualization(root_node=None):
     if institution:
         # Fetch institution data and add it to the 'data' dictionary
         data.get("nodes").append({"id": institution.id,
-                                  "name": institution.name,
+                                  "intitution_name": institution.name,
                                   # Add other institution attributes here
                                   "kind": "Institution",
                                   "fill": "green", "shape": "rectangle"})
