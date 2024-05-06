@@ -13,7 +13,7 @@ function createChart(visualizationData) {
 function initializeChart(visualizationData) {
     var chart = anychart.graph(visualizationData);
     chart.edges().arrows().enabled(true);
-    chart.nodes().labels().enabled(true).format("{%name}" + " , " + "{%kind}" + " , " + "ID=(" + "{%id}" + ")").fontSize(12).fontWeight(600);
+    chart.nodes().labels().enabled(true).format("{%name}" + " , ").fontSize(12).fontWeight(600);
     chart.tooltip().useHtml(true);
     chart.nodes().tooltip().format("{%name}");
     chart.edges().tooltip().format("Parent: {%from} -> Child: {%to} ({%title})");
