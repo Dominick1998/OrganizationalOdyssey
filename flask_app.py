@@ -780,3 +780,6 @@ def delete_institution_relation():
 
     return redirect(url_for("admin"))
     # This route enables the promotion of existing users to admin status, enhancing their privileges within the application.
+
+if __name__ == "__main__":
+    app.run()
