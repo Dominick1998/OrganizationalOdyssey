@@ -727,13 +727,20 @@ def delete_employee_relation():
             flash("Employee or Employer not found", "danger")
             return redirect(url_for("admin"))
 
-        relation = employee_relation.query.filter_by(employee_id=employee.id, employer_id=employer.id).first()
-        if relation:
-            db.session.delete(relation)
+        # Check if the relation exists
+        relation_exists = db.session.query(db.exists().where(
+            employee_relation.c.employee_id == employee.id and employee_relation.c.employer_id == employer.id
+        )).scalar()
+
+        if relation_exists:
+            # Delete the relation using execute
+            db.session.execute(employee_relation.delete().where(
+                employee_relation.c.employee_id == employee.id and employee_relation.c.employer_id == employer.id
+            ))
             db.session.commit()
             flash("Employee-employer relation deleted successfully!", "success")
         else:
-            flash("Employee-employer relation not found", "danger")
+            flash("Employee-employer relation does not exist", "danger")
 
     return redirect(url_for("admin"))
 
@@ -756,17 +763,20 @@ def delete_institution_relation():
             flash("Employee or Institution not found", "danger")
             return redirect(url_for("admin"))
 
-        relation = institution_relation.query.filter_by(employee_id=employee.id, institution_id=institution.id).first()
-        if relation:
-            db.session.delete(relation)
+        # Check if the relation exists
+        relation_exists = db.session.query(db.exists().where(
+            institution_relation.c.employee_id == employee.id and institution_relation.c.institution_id == institution.id
+        )).scalar()
+
+        if relation_exists:
+            # Delete the relation using execute
+            db.session.execute(institution_relation.delete().where(
+                institution_relation.c.employee_id == employee.id and institution_relation.c.institution_id == institution.id
+            ))
             db.session.commit()
             flash("Institution-employee relation deleted successfully!", "success")
         else:
-            flash("Institution-employee relation not found", "danger")
+            flash("Institution-employee relation does not exist", "danger")
 
     return redirect(url_for("admin"))
     # This route enables the promotion of existing users to admin status, enhancing their privileges within the application.
-
-
-if __name__ == "__main__":
-    app.run()
