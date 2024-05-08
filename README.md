@@ -13,6 +13,12 @@ Organizational Odyssey is a Flask-based web application designed to streamline t
 - **Secure User Authentication**: Robust login system with email confirmation for secure access to the system. See a [demo of the email confirmation process](https://calebmcquay.pythonanywhere.com/confirm/gAAAAABmCyahm3KXsAEDsnyNKrl_sWNgNJOTpeo4wHOqT97iwmUFQkfZ9JGU0uwQehMXZk23-Y8LhhtqoHC51cIwGPNRAiWOBl06wtXWiMgfgpstJSSrn1o=).
 - **Interactive Data Visualization**: Utilize visualization tools to represent organizational data dynamically, making it easier to digest and analyze.
 
+- ## Screenshots
+Here are some screenshots of the project:
+
+<img src="Screenshots/img1.png" width="300"> <br>
+<img src="Screenshots/img2.png" width="300">
+
 ## Getting Started
 
 ### Prerequisites
