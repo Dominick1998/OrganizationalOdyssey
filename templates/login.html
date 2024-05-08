@@ -1,8 +1,8 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <form method="POST" action="{{ url_for("login") }}">
+    <form method="POST" action="{{ url_for("register") }}">
         {{ form.hidden_tag() }}
-        <legend class="border-bottom mb-4">Log in</legend>
+        <legend class="border-bottom mb-4">Register</legend>
         <div class="form-group">
             {{ form.email.label(class="form-control-label") }}
             {% if form.email.errors %}
@@ -29,14 +29,26 @@
                 {{ form.password(class="form-control form-control-lg") }}
             {% endif %}
         </div>
+        <div class="form-group">
+            {{ form.confirm_password.label(class="form-control-label") }}
+            {% if form.confirm_password.errors %}
+                {{ form.confirm_password(class="form-control form-control-lg is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.confirm_password.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                {{ form.confirm_password(class="form-control form-control-lg") }}
+            {% endif %}
+        </div>
         <div class="form-group mt-3 mb-3">
             {{ form.submit(class="btn btn-outline-info") }}
         </div>
-        <a href="#">Forgot Password?</a>
     </form>
     <div class="border-top pt-3">
         <small class="text-muted">
-            Need an account? <a class="ml-2" href="{{ url_for("register") }}">Sign Up</a>
+            Already have an account? <a class="ml-2" href="{{ url_for("login") }}">Sign In</a>
         </small>
     </div>
 {% endblock content %}

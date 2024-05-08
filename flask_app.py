@@ -78,17 +78,26 @@ class Employer(db.Model):
     description = db.Column(db.String(60))
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime)
-    child_employers = db.relationship("Employer", secondary="employer_relation",
+    # Relationship to handle hierarchical structures of employers
+    child_employers = db.relationship("Employer",
+                                      secondary="employer_relation",
                                       primaryjoin=("employer_relation.c.parent_id == Employer.id"),
                                       secondaryjoin=("employer_relation.c.child_id == Employer.id"),
-                                      backref="parent_employers")
-         # Model representing an employer, includes self-referencing relationship to handle hierarchical structures
+                                      back_populates="parent_employers",
+                                      lazy="dynamic")
+    parent_employers = db.relationship("Employer",
+                                       secondary="employer_relation",
+                                       primaryjoin=("employer_relation.c.child_id == Employer.id"),
+                                       secondaryjoin=("employer_relation.c.parent_id == Employer.id"),
+                                       back_populates="child_employers",
+                                       lazy="dynamic")
+    # Relationship to employees
     has_employed = db.relationship("Employee",
                                    secondary="employee_relation",
                                    primaryjoin=("Employer.id == employee_relation.c.employer_id"),
                                    secondaryjoin=("Employee.id == employee_relation.c.employee_id"),
-                                   backref="employers_employed",
-                                   overlaps="employers_employed")
+                                   back_populates="employed_by",
+                                   overlaps="employees, employed_by")
 
 class Employee(db.Model):
     __tablename__ = "employee"
@@ -98,12 +107,16 @@ class Employee(db.Model):
     last_name = db.Column(db.String(60), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone_number = db.Column(db.String(15))
+    # Define a two-way relationship with lazy dynamic loading
     employed_by = db.relationship("Employer",
                                   secondary="employee_relation",
-                                  primaryjoin=("Employee.id == employee_relation.c.employee_id"),
-                                  secondaryjoin=("Employer.id == employee_relation.c.employer_id"),
-                                  backref="employees",
-                                  overlaps="employers_employed")
+                                  back_populates="has_employed",
+                                  lazy="dynamic")
+    employees = db.relationship("Employer",
+                                secondary="employee_relation",
+                                back_populates="has_employed",
+                                lazy="dynamic",
+                                overlaps="has_employed, employed_by")
 
 class Institution(db.Model):
     __tablename__ = "institution"
@@ -200,41 +213,152 @@ def confirm_account(token):
         # Route to handle email confirmation; decrypts the token to verify and activate the user account.
 
 
-@app.route("/visualization/<root_node>", methods=["GET", "POST"])
-@app.route("/visualization", methods=["POST"])
+@app.route("/visualization/<string:root_node>", methods=["GET", "POST"])
 @login_required
-def visualization(root_node=None):
+def visualization(root_node):
     form = SearchForm()
-    if root_node:
-        employer = Employer.query.filter_by(employer_name=root_node).first()
-    else:
-        employer = Employer.query.filter_by(employer_name=form.search.data).first()
+    # Try to fetch the entity based on the root_node identifier
+    employer = Employer.query.filter_by(employer_name=root_node).first()
+    employee = Employee.query.filter_by(last_name=root_node).first()
+    institution = Institution.query.filter_by(institution_name=root_node).first()
+    visited_nodes = set()
 
-    if not employer:
-        flash(f"Selected employer not found", "danger")
+    data = {"nodes": [], "edges": []}  # Initialize data structure
+
+    if employer:
+        visualize_employer_tree(employer, data, visited_nodes)
+        entity = employer
+        entity_type = 'Employer'
+    elif employee:
+        visualize_employee_tree(employee, data, visited_nodes)
+        entity = employee
+        entity_type = 'Employee'
+    elif institution:
+        visualize_institution_tree(institution, data, visited_nodes)
+        entity = institution
+        entity_type = 'Institution'
+    else:
+        flash("Node not found", "danger")
         return redirect(url_for("home"))
 
-    data = {"nodes": [], "edges": []}
-    visited_nodes = []
+    # Render the visualization page with the collected data
+    return render_template("visualization.html", data=data, entity=entity, entity_type=entity_type)
 
-    end_time = employer.end_date
-    end_time = end_time.strftime("%Y-%m-%d") if end_time is not None else "Active Company"
+# Continue with definitions for visualize_employer_tree, visualize_employee_tree, visualize_institution_tree
+def visualize_employer_tree(employer, data, visited_nodes):
+    if employer.id in visited_nodes:
+        return
+    visited_nodes.add(employer.id)
+    data['nodes'].append({
+        'id': employer.id,
+        'name': employer.employer_name,
+        'type': 'employer',
+        'address': employer.headquarters_address,
+        'start_date': employer.start_date.strftime('%Y-%m-%d'),
+        'end_date': employer.end_date.strftime('%Y-%m-%d') if employer.end_date else 'Active',
+        'description': employer.description or 'No description provided',
+        'color': '#FF9999',  # Light red
+        'shape': 'box'
+        })
 
-    description = employer.description if employer.description != "" else "No Description"
-    description = (description[:100] + "...") if len(description) > 100 else description
-    data.get("nodes").append({"id": employer.id,
-                              "name": employer.employer_name,
-                              "address": employer.headquarters_address,
-                              "start_date": employer.start_date.strftime("%Y-%m-%d"),
-                              "end_date": end_time,
-                              "description": description,
-                              "fill": "purple", "shape": "diamond"})
-    traverse_tree(employer, data, visited_nodes)
+    for child in employer.child_employers:
+        if child.id not in visited_nodes:
+            visualize_employer_tree(child, data, visited_nodes)
+            data['edges'].append({
+            'from': employer.id,
+            'to': child.id,
+            'from_name': employer.employer_name,
+            'to_name': child.employer_name
 
-    return render_template("visualization.html", employer=employer, data=data, end_time=end_time)
+            })
 
 
-        # Route to visualize the hierarchical structure of employers or organizational units.
+    for parent in employer.parent_employers:
+        if parent.id not in visited_nodes:
+            visualize_employer_tree(parent, data, visited_nodes)
+            data['edges'].append({
+                'from': parent.id,
+                'to': employer.id,
+                'from_name': parent.employer_name,
+                'to_name': employer.employer_name
+            })
+
+
+            # Visualize relationships with employees
+    for employee in employer.has_employed:
+        if employee.id not in visited_nodes:
+            visualize_employee_tree(employee, data, visited_nodes)
+            data['edges'].append({
+            'from': employee.id,
+            'to': employer.id,
+            'from_name': employer.employer_name,
+            'to_name': f"{employee.first_name} {employee.last_name}"
+        })
+
+
+
+
+def visualize_employee_tree(employee, data, visited_nodes):
+    if employee.id in visited_nodes:
+        return
+    visited_nodes.add(employee.id)
+    data['nodes'].append({
+        'id': employee.id,
+        'name': f"{employee.first_name} {employee.last_name}",
+        'type': 'employee',
+        'email': employee.email,
+        'phone_number': employee.phone_number,
+        'color': '#99CCFF',  # Light blue
+        'shape': 'ellipse'
+    })
+
+    for employer in employee.employed_by:
+        if employer.id not in visited_nodes:
+            visualize_employer_tree(employer, data, visited_nodes)
+            data['edges'].append({
+                'from': employee.id,
+                'to': employer.id,
+                'from_name': f"{employee.first_name} {employee.last_name}",
+                'to_name': employer.employer_name
+            })
+
+    for institution in employee.certifying_institution:
+        if institution.id not in visited_nodes:
+            visualize_institution_tree(institution, data, visited_nodes)
+            data['edges'].append({
+                'from': employee.id,
+                'to': institution.id,
+                'from_name': f"{employee.first_name} {employee.last_name}",
+                'to_name': institution.institution_name,
+                'relationship': 'certified by'
+            })
+
+def visualize_institution_tree(institution, data, visited_nodes):
+    if institution.id in visited_nodes:
+        return
+    visited_nodes.add(institution.id)
+    data['nodes'].append({
+        'id': institution.id,
+        'name': institution.institution_name,
+        'type': 'institution',
+        'location': institution.location,
+        'description': institution.description or 'No description provided',
+        'color': '#99CC66',  # Light green
+        'shape': 'triangle'
+    })
+
+    # Employees certified by the institution
+    for employee in institution.cert_awarded_to:
+        if employee.id not in visited_nodes:
+            visualize_employee_tree(employee, data, visited_nodes)
+        data['edges'].append({
+            'from': institution.id,
+            'to': employee.id,
+            'from_name': institution.institution_name,
+            'to_name': f"{employee.first_name} {employee.last_name}",
+            'relationship': 'certified'
+        })
+
 
 # Additional routes for administrative functions, employer and employee management
 @app.route("/admin")
@@ -275,6 +399,28 @@ def employees():
     all_employees = Employee.query.order_by(Employee.last_name).all()
     return render_template("employees.html", all_employees=all_employees)
 
+def traverse_employee_tree(root_employee, data, visited_nodes):
+    if root_employee in visited_nodes:
+        return
+
+    data.get("nodes").append({
+        "id": root_employee.id,
+        "name": f"{root_employee.first_name} {root_employee.last_name}",
+        "email": root_employee.email,
+        "phone_number": root_employee.phone_number,
+        # Add any other relevant employee information
+        "fill": "blue",
+        "shape": "circle"
+    })
+    visited_nodes.add(root_employee)
+
+    for employer in root_employee.employed_by:
+        data["edges"].append({
+            "from": root_employee.id,
+            "to": employer.id,
+            "from_name": f"{root_employee.first_name} {root_employee.last_name}",
+            "to_name": employer.employer_name
+        })
 
 @app.route("/institutions")
 @login_required
@@ -282,6 +428,28 @@ def institutions():
     all_institutions = Institution.query.all()
     return render_template("institutions.html", all_institutions=all_institutions)
 
+def traverse_institution_tree(root_institution, data, visited_nodes):
+    if root_institution in visited_nodes:
+        return
+
+    data.get("nodes").append({
+        "id": root_institution.id,
+        "name": root_institution.institution_name,
+        "location": root_institution.location,
+        # Add any other relevant institution information
+        "fill": "green",
+        "shape": "square"
+    })
+    visited_nodes.add(root_institution)
+
+    for employee in root_institution.cert_awarded_to:
+        data["edges"].append({
+            "from": root_institution.id,
+            "to": employee.id,
+            "from_name": root_institution.institution_name,
+            "to_name": f"{employee.first_name} {employee.last_name}"
+        })
+        # Traverse further down the tree if needed (e.g., other relationships involving employees)
 
 @app.route("/employers")
 @login_required
@@ -309,7 +477,7 @@ def traverse_tree(root_employer, data, visited_nodes):
                               "start_date": root_employer.start_date.strftime("%Y-%m-%d"),
                               "end_date": end_time,
                               "description": description})
-    visited_nodes.append(root_employer)
+    visited_nodes.add(root_employer)
 
     for child_employer in root_employer.child_employers:
         data.get("edges").append({"from": root_employer.id,
@@ -780,6 +948,7 @@ def delete_institution_relation():
 
     return redirect(url_for("admin"))
     # This route enables the promotion of existing users to admin status, enhancing their privileges within the application.
+
 
 if __name__ == "__main__":
     app.run()

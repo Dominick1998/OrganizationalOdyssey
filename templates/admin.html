@@ -1,375 +1,354 @@
 {% extends 'layout.html' %}
 {% block content %}
     <head>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    </head>
-    <div class="pb-3">
-      <h1>Admin Section</h1>
-    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<div class="pb-3">
+    <h1>Admin Section</h1>
+</div>
 
-      <!-- Admin-specific content goes here -->
-    <ul class="nav">
-        <li class="active"><a data-toggle="tab" href="#addemployer" class="btn btn-outline-info border">Add Employer</a></li>
-        <li><a data-toggle="tab" href="#editemployer" class="btn btn-outline-info border">Edit Employer</a></li>
-        <li><a data-toggle="tab" href="#deleteemployer" class="btn btn-outline-info border">Delete Employer</a></li>
-        <li><a data-toggle="tab" href="#addrelation" class="btn btn-outline-info border">Add Employer Relation</a></li>
-        <li><a data-toggle="tab" href="#addemployeerelation" class="btn btn-outline-info border">Add Employee Relation</a></li>
-        <li><a data-toggle="tab" href="#addemployee" class="btn btn-outline-info border">Add Employee</a></li>
-        <li><a data-toggle="tab" href="#editemployee" class="btn btn-outline-info border">Edit Employee</a></li>
-        <li><a data-toggle="tab" href="#deleteemployee" class="btn btn-outline-info border">Delete Employee</a></li>
-        <li><a data-toggle="tab" href="#addinstitution" class="btn btn-outline-info border">Add Institution</a></li>
-        <li><a data-toggle="tab" href="#editinstitution" class="btn btn-outline-info border">Edit Institution</a></li>
-        <li><a data-toggle="tab" href="#deleteinstitution" class="btn btn-outline-info border">Delete Institution</a></li>
-        <li><a data-toggle="tab" href="#addinstitutionrelation" class="btn btn-outline-info border">Add Institution Relation</a></li>
-        <li><a data-toggle="tab" href="#deleteemployerrelation" class="btn btn-outline-info border">Delete Employer Relation</a></li>
-        <li><a data-toggle="tab" href="#deleteemployeerelation" class="btn btn-outline-info border">Delete Employee Relation</a></li>
-        <li><a data-toggle="tab" href="#deleteinstitutionrelation" class="btn btn-outline-info border">Delete Institution Relation</a></li>
-        <li><a data-toggle="tab" href="#addadmin" class="btn btn-outline-info border">Add Admin</a></li>
-    </ul>
+<!-- Admin-specific content goes here -->
+<ul class="nav nav-tabs">
+    <!-- Manage Employers -->
+    <li class="active"><a data-toggle="tab" href="#manageemployers" class="btn btn-outline-info border">Manage Employers</a></li>
+    <!-- Manage Employees -->
+    <li><a data-toggle="tab" href="#manageemployees" class="btn btn-outline-info border">Manage Employees</a></li>
+    <!-- Manage Institutions -->
+    <li><a data-toggle="tab" href="#manageinstitutions" class="btn btn-outline-info border">Manage Institutions</a></li>
+    <!-- Manage Relations -->
+    <li><a data-toggle="tab" href="#managerelations" class="btn btn-outline-info border">Manage Relations</a></li>
+    <!-- Add Admin -->
+    <li><a data-toggle="tab" href="#manageadmin" class="btn btn-outline-info border">Add Admin</a></li>
+</ul>
 
-    <div class="tab-content">
-      <div id="addemployer" class="tab-pane active">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('add_employer') }}">
-                {{ new_employer_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Add Employer</legend>
-                <div class="form-group">
-                    {{ new_employer_form.employer_name.label(class="form-control-label") }}
-                    {% if new_employer_form.employer_name.errors %}
-                        {{ new_employer_form.employer_name(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in new_employer_form.employer_name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
+<hr>
+
+<div class="tab-content">
+    <!-- Manage Employers Tab -->
+    <div id="manageemployers" class="tab-pane active">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#addemployer" class="btn btn-outline-info border">Add Employer</a></li>
+            <li><a data-toggle="tab" href="#editemployer" class="btn btn-outline-info border">Edit Employer</a></li>
+            <li><a data-toggle="tab" href="#deleteemployer" class="btn btn-outline-info border">Delete Employer</a></li>
+        </ul>
+        <div class="tab-content">
+            <!-- Add Employer -->
+            <div id="addemployer" class="tab-pane active">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('add_employer') }}">
+                        {{ new_employer_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Add Employer</legend>
+                        <div class="form-group">
+                            {{ new_employer_form.employer_name.label(class="form-control-label") }}
+                            {% if new_employer_form.employer_name.errors %}
+                                {{ new_employer_form.employer_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in new_employer_form.employer_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ new_employer_form.employer_name(class="form-control form-control-lg") }}
+                            {% endif %}
                         </div>
-                    {% else %}
-                        {{ new_employer_form.employer_name(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
 
-                <div class="form-group">
-                    {{ new_employer_form.headquarters_address.label(class="form-control-label") }}
-                    {{ new_employer_form.headquarters_address(class="form-control form-control-lg") }}
-                </div>
-
-                <div class="form-group">
-                    {{ new_employer_form.description.label(class="form-control-label") }}
-                    {{ new_employer_form.description(class="form-control form-control-lg") }}
-                </div>
-
-                <div class="form-group">
-                    {{ new_employer_form.start_date.label(class="form-control-label") }}
-                    {% if new_employer_form.start_date.errors %}
-                        {{ new_employer_form.start_date(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in new_employer_form.start_date.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
+                        <div class="form-group">
+                            {{ new_employer_form.headquarters_address.label(class="form-control-label") }}
+                            {{ new_employer_form.headquarters_address(class="form-control form-control-lg") }}
                         </div>
-                    {% else %}
-                        {{ new_employer_form.start_date(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
 
-                <div class="form-group">
-                    {{ new_employer_form.end_date.label(class="form-control-label") }}
-                    {{ new_employer_form.end_date(class="form-control form-control-lg") }}
-                </div>
+                        <div class="form-group">
+                            {{ new_employer_form.description.label(class="form-control-label") }}
+                            {{ new_employer_form.description(class="form-control form-control-lg") }}
+                        </div>
 
-                <div class="form-group mt-3 mb-3">
-                    {{ new_employer_form.submit(class="btn btn-outline-info border rounded") }}
+                        <div class="form-group">
+                            {{ new_employer_form.start_date.label(class="form-control-label") }}
+                            {% if new_employer_form.start_date.errors %}
+                                {{ new_employer_form.start_date(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in new_employer_form.start_date.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ new_employer_form.start_date(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ new_employer_form.end_date.label(class="form-control-label") }}
+                            {{ new_employer_form.end_date(class="form-control form-control-lg") }}
+                        </div>
+
+                        <div class="form-group mt-3 mb-3">
+                            {{ new_employer_form.submit(class="btn btn-outline-info border rounded") }}
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
-      </div>
-      <div id="addrelation" class="tab-pane">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('add_employer_relation') }}">
-                {{ relation_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Add Employer-Employer Relation</legend>
-                <div class="form-group">
-                    {{ relation_form.parent_name.label(class="form-control-label") }}
-                    {{ relation_form.parent_name(class="form-control form-control-lg") }}
+            </div>
+            <!-- Edit Employer -->
+            <div id="editemployer" class="tab-pane">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('edit_employer') }}">
+                        {{ edit_employer_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Edit Employer</legend>
+
+                        <div class="form-group">
+                            {{ edit_employer_form.employer_name.label(class="form-control-label") }}
+                            {% if edit_employer_form.employer_name.errors %}
+                                {{ edit_employer_form.employer_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in edit_employer_form.employer_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ edit_employer_form.employer_name(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ edit_employer_form.headquarters_address.label(class="form-control-label") }}
+                            {{ edit_employer_form.headquarters_address(class="form-control form-control-lg") }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ edit_employer_form.description.label(class="form-control-label") }}
+                            {{ edit_employer_form.description(class="form-control form-control-lg") }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ edit_employer_form.start_date.label(class="form-control-label") }}
+                            {{ edit_employer_form.start_date(class="form-control form-control-lg") }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ edit_employer_form.end_date.label(class="form-control-label") }}
+                            {{ edit_employer_form.end_date(class="form-control form-control-lg") }}
+                        </div>
+
+                        <div class="form-group mt-3 mb-3">
+                            {{ edit_employer_form.submit(class="btn btn-outline-info") }}
+                        </div>
+                    </form>
                 </div>
-                <div class="form-group">
-                    {{ relation_form.child_name.label(class="form-control-label") }}
-                    {{ relation_form.child_name(class="form-control form-control-lg") }}
+            </div>
+            <!-- Delete Employer -->
+            <div id="deleteemployer" class="tab-pane">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('delete_employer') }}">
+                        {{ delete_employer_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Delete Employer</legend>
+
+                        <div class="form-group">
+                            {{ delete_employer_form.employer_name.label(class="form-control-label") }}
+                            {% if delete_employer_form.employer_name.errors %}
+                                {{ delete_employer_form.employer_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in delete_employer_form.employer_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ delete_employer_form.employer_name(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group mt-3 mb-3">
+                            {{ delete_employer_form.submit(class="btn btn-outline-info") }}
+                        </div>
+                    </form>
                 </div>
-                <div class="form-group mt-3 mb-3">
-                    {{ relation_form.submit(class="btn btn-outline-info border rounded") }}
-                </div>
-            </form>
-        </div>
-      </div>
-    <div id="addemployeerelation" class="tab-pane">
-            <div class="border shadow p-3 mb-5 bg-white rounded">
-                <form method="POST" action="{{ url_for('add_employee_relation') }}">
-                    {{ employee_relation_form.hidden_tag() }}
-                    <legend class="border-bottom mb-4">Add Employee-Employer Relation</legend>
-                    <div class="form-group">
-                        {{ employee_relation_form.first_name.label(class="form-control-label") }}
-                        {{ employee_relation_form.first_name(class="form-control form-control-lg") }}
-                    </div>
-                    <div class="form-group">
-                        {{ employee_relation_form.last_name.label(class="form-control-label") }}
-                        {{ employee_relation_form.last_name(class="form-control form-control-lg") }}
-                    </div>
-                    <div class="form-group">
-                        {{ employee_relation_form.employer_name.label(class="form-control-label") }}
-                        {{ employee_relation_form.employer_name(class="form-control form-control-lg") }}
-                    </div>
-                    <div class="form-group">
-                        {{ employee_relation_form.job_title.label(class="form-control-label") }}
-                        {{ employee_relation_form.job_title(class="form-control form-control-lg") }}
-                    </div>
-                    <div class="form-group">
-                        {{ employee_relation_form.start_date.label(class="form-control-label") }}
-                        {{ employee_relation_form.start_date(class="form-control form-control-lg") }}
-                    </div>
-                    <div class="form-group">
-                        {{ employee_relation_form.end_date.label(class="form-control-label") }}
-                        {{ employee_relation_form.end_date(class="form-control form-control-lg") }}
-                    </div>
-                    <div class="form-group mt-3 mb-3">
-                        {{ employee_relation_form.submit(class="btn btn-outline-info border rounded") }}
-                    </div>
-                </form>
             </div>
         </div>
-    <div id="editemployer" class="tab-pane">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('edit_employer') }}">
-                {{ edit_employer_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Edit Employer</legend>
+    </div>
 
-                <div class="form-group">
-                    {{ edit_employer_form.employer_name.label(class="form-control-label") }}
-                    {% if edit_employer_form.employer_name.errors %}
-                        {{ edit_employer_form.employer_name(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in edit_employer_form.employer_name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
+    <!-- Manage Employees Tab -->
+    <div id="manageemployees" class="tab-pane">
+        <ul class="nav nav-tabs">
+            <li><a data-toggle="tab" href="#addemployee" class="btn btn-outline-info border">Add Employee</a></li>
+            <li><a data-toggle="tab" href="#editemployee" class="btn btn-outline-info border">Edit Employee</a></li>
+            <li><a data-toggle="tab" href="#deleteemployee" class="btn btn-outline-info border">Delete Employee</a></li>
+        </ul>
+        <div class="tab-content">
+            <!-- Add Employer -->
+            <div id="addemployee" class="tab-pane active">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('add_employee') }}">
+                        {{ add_employee_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Add Employee</legend>
+                        <div class="form-group">
+                            {{ add_employee_form.first_name.label(class="form-control-label") }}
+                            {% if add_employee_form.first_name.errors %}
+                                {{ add_employee_form.first_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in add_employee_form.first_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ add_employee_form.first_name(class="form-control form-control-lg") }}
+                            {% endif %}
                         </div>
-                    {% else %}
-                        {{ edit_employer_form.employer_name(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
 
-                <div class="form-group">
-                    {{ edit_employer_form.headquarters_address.label(class="form-control-label") }}
-                    {{ edit_employer_form.headquarters_address(class="form-control form-control-lg") }}
-                </div>
+                        <div class="form-group">
+                            {{ add_employee_form.last_name.label(class="form-control-label") }}
+                            {% if add_employee_form.last_name.errors %}
+                                {{ add_employee_form.last_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in add_employee_form.last_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ add_employee_form.last_name(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
 
-                <div class="form-group">
-                    {{ edit_employer_form.description.label(class="form-control-label") }}
-                    {{ edit_employer_form.description(class="form-control form-control-lg") }}
-                </div>
+                        <div class="form-group">
+                            {{ add_employee_form.email.label(class="form-control-label") }}
+                            {% if add_employee_form.email.errors %}
+                                {{ add_employee_form.email(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in add_employee_form.email.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ add_employee_form.email(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
 
-                <div class="form-group">
-                    {{ edit_employer_form.start_date.label(class="form-control-label") }}
-                    {{ edit_employer_form.start_date(class="form-control form-control-lg") }}
-                </div>
+                        <div class="form-group">
+                            {{ add_employee_form.phone_number.label(class="form-control-label") }}
+                            {{ add_employee_form.phone_number(class="form-control form-control-lg") }}
+                        </div>
 
-                <div class="form-group">
-                    {{ edit_employer_form.end_date.label(class="form-control-label") }}
-                    {{ edit_employer_form.end_date(class="form-control form-control-lg") }}
+                        <div class="form-group mt-3 mb-3">
+                            {{ add_employee_form.submit(class="btn btn-outline-info border rounded") }}
+                        </div>
+                    </form>
                 </div>
+            </div>
+            <!-- Edit Employer -->
+            <div id="editemployee" class="tab-pane">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('edit_employee') }}">
+                        {{ edit_employee_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Edit Employee</legend>
 
-                <div class="form-group mt-3 mb-3">
-                    {{ edit_employer_form.submit(class="btn btn-outline-info") }}
+                        <div class="form-group">
+                            {{ edit_employee_form.first_name.label(class="form-control-label") }}
+                            {% if edit_employee_form.first_name.errors %}
+                                {{ edit_employee_form.first_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in edit_employee_form.first_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ edit_employee_form.first_name(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ edit_employee_form.last_name.label(class="form-control-label") }}
+                            {% if edit_employee_form.last_name.errors %}
+                                {{ edit_employee_form.last_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in edit_employee_form.last_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ edit_employee_form.last_name(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ edit_employee_form.email.label(class="form-control-label") }}
+                            {% if edit_employee_form.email.errors %}
+                                {{ edit_employee_form.email(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in edit_employee_form.email.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ edit_employee_form.email(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ edit_employee_form.phone_number.label(class="form-control-label") }}
+                            {{ edit_employee_form.phone_number(class="form-control form-control-lg") }}
+                        </div>
+
+                        <div class="form-group mt-3 mb-3">
+                            {{ edit_employee_form.submit(class="btn btn-outline-info") }}
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
+            <!-- Delete Employer -->
+            <div id="deleteemployee" class="tab-pane">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('delete_employee') }}">
+                        {{ delete_employee_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Delete Employee</legend>
+
+                        <div class="form-group">
+                            {{ delete_employee_form.first_name.label(class="form-control-label") }}
+                            {% if delete_employee_form.first_name.errors %}
+                                {{ delete_employee_form.first_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in delete_employee_form.first_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ delete_employee_form.first_name(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ delete_employee_form.last_name.label(class="form-control-label") }}
+                            {% if delete_employee_form.last_name.errors %}
+                                {{ delete_employee_form.last_name(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in delete_employee_form.last_name.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ delete_employee_form.last_name(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group mt-3 mb-3">
+                            {{ delete_employee_form.submit(class="btn btn-outline-info") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-    <div id="deleteemployer" class="tab-pane">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('delete_employer') }}">
-                {{ delete_employer_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Delete Employer</legend>
 
-                <div class="form-group">
-                    {{ delete_employer_form.employer_name.label(class="form-control-label") }}
-                    {% if delete_employer_form.employer_name.errors %}
-                        {{ delete_employer_form.employer_name(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in delete_employer_form.employer_name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ delete_employer_form.employer_name(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-
-                <div class="form-group mt-3 mb-3">
-                    {{ delete_employer_form.submit(class="btn btn-outline-info") }}
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="addemployee" class="tab-pane">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('add_employee') }}">
-                {{ add_employee_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Add Employee</legend>
-                <div class="form-group">
-                    {{ add_employee_form.first_name.label(class="form-control-label") }}
-                    {% if add_employee_form.first_name.errors %}
-                        {{ add_employee_form.first_name(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in add_employee_form.first_name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ add_employee_form.first_name(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    {{ add_employee_form.last_name.label(class="form-control-label") }}
-                    {% if add_employee_form.last_name.errors %}
-                        {{ add_employee_form.last_name(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in add_employee_form.last_name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ add_employee_form.last_name(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    {{ add_employee_form.email.label(class="form-control-label") }}
-                    {% if add_employee_form.email.errors %}
-                        {{ add_employee_form.email(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in add_employee_form.email.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ add_employee_form.email(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    {{ add_employee_form.phone_number.label(class="form-control-label") }}
-                    {{ add_employee_form.phone_number(class="form-control form-control-lg") }}
-                </div>
-
-                <div class="form-group mt-3 mb-3">
-                    {{ add_employee_form.submit(class="btn btn-outline-info border rounded") }}
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="editemployee" class="tab-pane">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('edit_employee') }}">
-                {{ edit_employee_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Edit Employee</legend>
-
-                <div class="form-group">
-                    {{ edit_employee_form.first_name.label(class="form-control-label") }}
-                    {% if edit_employee_form.first_name.errors %}
-                        {{ edit_employee_form.first_name(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in edit_employee_form.first_name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ edit_employee_form.first_name(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    {{ edit_employee_form.last_name.label(class="form-control-label") }}
-                    {% if edit_employee_form.last_name.errors %}
-                        {{ edit_employee_form.last_name(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in edit_employee_form.last_name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ edit_employee_form.last_name(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    {{ edit_employee_form.email.label(class="form-control-label") }}
-                    {% if edit_employee_form.email.errors %}
-                        {{ edit_employee_form.email(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in edit_employee_form.email.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ edit_employee_form.email(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    {{ edit_employee_form.phone_number.label(class="form-control-label") }}
-                    {{ edit_employee_form.phone_number(class="form-control form-control-lg") }}
-                </div>
-
-                <div class="form-group mt-3 mb-3">
-                    {{ edit_employee_form.submit(class="btn btn-outline-info") }}
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="deleteemployee" class="tab-pane">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('delete_employee') }}">
-                {{ delete_employee_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Delete Employee</legend>
-
-                <div class="form-group">
-                    {{ delete_employee_form.first_name.label(class="form-control-label") }}
-                    {% if delete_employee_form.first_name.errors %}
-                        {{ delete_employee_form.first_name(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in delete_employee_form.first_name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ delete_employee_form.first_name(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    {{ delete_employee_form.last_name.label(class="form-control-label") }}
-                    {% if delete_employee_form.last_name.errors %}
-                        {{ delete_employee_form.last_name(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in delete_employee_form.last_name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ delete_employee_form.last_name(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-
-                <div class="form-group mt-3 mb-3">
-                    {{ delete_employee_form.submit(class="btn btn-outline-info") }}
-                </div>
-            </form>
-        </div>
-    </div>
-        <div id="addinstitution" class="tab-pane">
-            <div class="border shadow p-3 mb-5 bg-white rounded">
-                <form method="POST" action="{{ url_for('add_institution') }}">
-                    {{ add_institution_form.hidden_tag() }}
+    <!-- Manage Institutions Tab -->
+    <div id="manageinstitutions" class="tab-pane">
+        <ul class="nav nav-tabs">
+            <li><a data-toggle="tab" href="#addinstitution" class="btn btn-outline-info border">Add Institution</a></li>
+            <li><a data-toggle="tab" href="#editinstitution" class="btn btn-outline-info border">Edit Institution</a></li>
+            <li><a data-toggle="tab" href="#deleteinstitution" class="btn btn-outline-info border">Delete Institution</a></li>
+        </ul>
+        <div class="tab-content">
+            <!-- Add Employer -->
+            <div id="addinstitution" class="tab-pane active">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('add_institution') }}">
+                        {{ add_institution_form.hidden_tag() }}
                         <legend class="border-bottom mb-4">Add Institution</legend>
                         <div class="form-group">
                             {{ add_institution_form.institution_name.label(class="form-control-label") }}
@@ -398,6 +377,7 @@
                     </form>
                 </div>
             </div>
+            <!-- Edit Employer -->
             <div id="editinstitution" class="tab-pane">
                 <div class="border shadow p-3 mb-5 bg-white rounded">
                     <form method="POST" action="{{ url_for('edit_institution') }}">
@@ -430,6 +410,7 @@
                     </form>
                 </div>
             </div>
+            <!-- Delete Employer -->
             <div id="deleteinstitution" class="tab-pane">
                 <div class="border shadow p-3 mb-5 bg-white rounded">
                     <form method="POST" action="{{ url_for('delete_institution') }}">
@@ -454,127 +435,210 @@
                     </form>
                 </div>
             </div>
-    <div id="addinstitutionrelation" class="tab-pane">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('add_institution_relation') }}">
-                {{ institution_relation_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Establish Institution Relation</legend>
-                <div class="form-group">
-                    {{ institution_relation_form.first_name.label(class="form-control-label") }}
-                    {{ institution_relation_form.first_name(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group">
-                    {{ institution_relation_form.last_name.label(class="form-control-label") }}
-                    {{ institution_relation_form.last_name(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group">
-                    {{ institution_relation_form.granting_institution.label(class="form-control-label") }}
-                    {{ institution_relation_form.granting_institution(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group">
-                    {{ institution_relation_form.granted_certification.label(class="form-control-label") }}
-                    {{ institution_relation_form.granted_certification(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group">
-                    {{ institution_relation_form.award_date.label(class="form-control-label") }}
-                    {{ institution_relation_form.award_date(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group mt-3 mb-3">
-                    {{ institution_relation_form.submit(class="btn btn-outline-info border rounded") }}
-                </div>
-            </form>
         </div>
     </div>
-    <div id="deleteemployerrelation" class="tab-pane">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('delete_employer_relation') }}">
-                {{ delete_employer_relation_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Delete Employer-Employer Relation</legend>
-                <div class="form-group">
-                    {{ delete_employer_relation_form.parent_name.label(class="form-control-label") }}
-                    {{ delete_employer_relation_form.parent_name(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group">
-                    {{ delete_employer_relation_form.child_name.label(class="form-control-label") }}
-                    {{ delete_employer_relation_form.child_name(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group mt-3 mb-3">
-                    {{ delete_employer_relation_form.submit(class="btn btn-outline-info border rounded") }}
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="deleteemployeerelation" class="tab-pane">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('delete_employee_relation') }}">
-                {{ delete_employee_relation_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Delete Employee-Employer Relation</legend>
-                <div class="form-group">
-                    {{ institution_relation_form.first_name.label(class="form-control-label") }}
-                    {{ institution_relation_form.first_name(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group">
-                    {{ institution_relation_form.last_name.label(class="form-control-label") }}
-                    {{ institution_relation_form.last_name(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group">
-                    {{ delete_employee_relation_form.employer_name.label(class="form-control-label") }}
-                    {{ delete_employee_relation_form.employer_name(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group mt-3 mb-3">
-                    {{ delete_employee_relation_form.submit(class="btn btn-outline-info border rounded") }}
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="deleteinstitutionrelation" class="tab-pane">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('delete_institution_relation') }}">
-                {{ delete_institution_relation_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Delete Institution-Employee Relation</legend>
-                <div class="form-group">
-                    {{ institution_relation_form.first_name.label(class="form-control-label") }}
-                    {{ institution_relation_form.first_name(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group">
-                    {{ institution_relation_form.last_name.label(class="form-control-label") }}
-                    {{ institution_relation_form.last_name(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group">
-                    {{ delete_institution_relation_form.institution_name.label(class="form-control-label") }}
-                    {{ delete_institution_relation_form.institution_name(class="form-control form-control-lg") }}
-                </div>
-                <div class="form-group mt-3 mb-3">
-                    {{ delete_institution_relation_form.submit(class="btn btn-outline-info border rounded") }}
-                </div>
-            </form>
-        </div>
-    </div>
-    <div id="addadmin" class="tab-pane">
-        <div class="border shadow p-3 mb-5 bg-white rounded">
-            <form method="POST" action="{{ url_for('add_admin') }}">
-                {{ add_admin_form.hidden_tag() }}
-                <legend class="border-bottom mb-4">Add Admin</legend>
 
-                <div class="form-group">
-                    {{ add_admin_form.email_address.label(class="form-control-label") }}
-                    {% if add_admin_form.email_address.errors %}
-                        {{ add_admin_form.email_address(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in add_admin_form.email_address.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
+    <!-- Manage Relations Tab -->
+    <div id="managerelations" class="tab-pane">
+        <ul class="nav nav-tabs">
+            <li><a data-toggle="tab" href="#addrelation" class="btn btn-outline-info border">Add Employer-Employer Relation</a></li>
+            <li><a data-toggle="tab" href="#addemployeerelation" class="btn btn-outline-info border">Add Employee-Employer Relation</a></li>
+            <li><a data-toggle="tab" href="#addinstitutionrelation" class="btn btn-outline-info border">Add Institution-Employee Relation</a></li>
+            <li><a data-toggle="tab" href="#deleteemployerrelation" class="btn btn-outline-info border">Delete Employer-Employer Relation</a></li>
+            <li><a data-toggle="tab" href="#deleteemployeerelation" class="btn btn-outline-info border">Delete Employee-Employer Relation</a></li>
+            <li><a data-toggle="tab" href="#deleteinstitutionrelation" class="btn btn-outline-info border">Delete Institution-Employee Relation</a></li>
+        </ul>
+        <div class="tab-content">
+            <!-- Add Employer -->
+            <div id="addrelation" class="tab-pane active">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('add_employer_relation') }}">
+                        {{ relation_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Add Employer-Employer Relation</legend>
+                        <div class="form-group">
+                            {{ relation_form.parent_name.label(class="form-control-label") }}
+                            {{ relation_form.parent_name(class="form-control form-control-lg") }}
                         </div>
-                    {% else %}
-                        {{ add_admin_form.email_address(class="form-control form-control-lg") }}
-                    {% endif %}
+                        <div class="form-group">
+                            {{ relation_form.child_name.label(class="form-control-label") }}
+                            {{ relation_form.child_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group mt-3 mb-3">
+                            {{ relation_form.submit(class="btn btn-outline-info border rounded") }}
+                        </div>
+                    </form>
                 </div>
-
-                <div class="form-group mt-3 mb-3">
-                    {{ add_admin_form.submit(class="btn btn-outline-info") }}
+            </div>
+            <!-- Edit Employer -->
+            <div id="addemployeerelation" class="tab-pane">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('add_employee_relation') }}">
+                        {{ employee_relation_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Add Employee-Employer Relation</legend>
+                        <div class="form-group">
+                            {{ employee_relation_form.first_name.label(class="form-control-label") }}
+                            {{ employee_relation_form.first_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ employee_relation_form.last_name.label(class="form-control-label") }}
+                            {{ employee_relation_form.last_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ employee_relation_form.employer_name.label(class="form-control-label") }}
+                            {{ employee_relation_form.employer_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ employee_relation_form.job_title.label(class="form-control-label") }}
+                            {{ employee_relation_form.job_title(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ employee_relation_form.start_date.label(class="form-control-label") }}
+                            {{ employee_relation_form.start_date(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ employee_relation_form.end_date.label(class="form-control-label") }}
+                            {{ employee_relation_form.end_date(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group mt-3 mb-3">
+                            {{ employee_relation_form.submit(class="btn btn-outline-info border rounded") }}
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
+            <!-- Delete Employer -->
+            <div id="addinstitutionrelation" class="tab-pane">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('add_institution_relation') }}">
+                        {{ institution_relation_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Establish Institution Relation</legend>
+                        <div class="form-group">
+                            {{ institution_relation_form.first_name.label(class="form-control-label") }}
+                            {{ institution_relation_form.first_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ institution_relation_form.last_name.label(class="form-control-label") }}
+                            {{ institution_relation_form.last_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ institution_relation_form.granting_institution.label(class="form-control-label") }}
+                            {{ institution_relation_form.granting_institution(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ institution_relation_form.granted_certification.label(class="form-control-label") }}
+                            {{ institution_relation_form.granted_certification(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ institution_relation_form.award_date.label(class="form-control-label") }}
+                            {{ institution_relation_form.award_date(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group mt-3 mb-3">
+                            {{ institution_relation_form.submit(class="btn btn-outline-info border rounded") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="deleteemployerrelation" class="tab-pane">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('delete_employer_relation') }}">
+                        {{ delete_employer_relation_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Delete Employer-Employer Relation</legend>
+                        <div class="form-group">
+                            {{ delete_employer_relation_form.parent_name.label(class="form-control-label") }}
+                            {{ delete_employer_relation_form.parent_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ delete_employer_relation_form.child_name.label(class="form-control-label") }}
+                            {{ delete_employer_relation_form.child_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group mt-3 mb-3">
+                            {{ delete_employer_relation_form.submit(class="btn btn-outline-info border rounded") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="deleteemployeerelation" class="tab-pane">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('delete_employee_relation') }}">
+                        {{ delete_employee_relation_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Delete Employee-Employer Relation</legend>
+                        <div class="form-group">
+                            {{ institution_relation_form.first_name.label(class="form-control-label") }}
+                            {{ institution_relation_form.first_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ institution_relation_form.last_name.label(class="form-control-label") }}
+                            {{ institution_relation_form.last_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ delete_employee_relation_form.employer_name.label(class="form-control-label") }}
+                            {{ delete_employee_relation_form.employer_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group mt-3 mb-3">
+                            {{ delete_employee_relation_form.submit(class="btn btn-outline-info border rounded") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="deleteinstitutionrelation" class="tab-pane">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('delete_institution_relation') }}">
+                        {{ delete_institution_relation_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Delete Institution-Employee Relation</legend>
+                        <div class="form-group">
+                            {{ institution_relation_form.first_name.label(class="form-control-label") }}
+                            {{ institution_relation_form.first_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ institution_relation_form.last_name.label(class="form-control-label") }}
+                            {{ institution_relation_form.last_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group">
+                            {{ delete_institution_relation_form.institution_name.label(class="form-control-label") }}
+                            {{ delete_institution_relation_form.institution_name(class="form-control form-control-lg") }}
+                        </div>
+                        <div class="form-group mt-3 mb-3">
+                            {{ delete_institution_relation_form.submit(class="btn btn-outline-info border rounded") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Add Admin Tab -->
+    <div id="manageadmin" class="tab-pane">
+        <ul class="nav nav-tabs">
+            <li><a data-toggle="tab" href="#addadmin" class="btn btn-outline-info border">Add Admin</a></li>
+        </ul>
+        <div class="tab-content">
+            <div id="addadmin" class="tab-pane active">
+                <div class="border shadow p-3 mb-5 bg-white rounded">
+                    <form method="POST" action="{{ url_for('add_admin') }}">
+                        {{ add_admin_form.hidden_tag() }}
+                        <legend class="border-bottom mb-4">Add Admin</legend>
+
+                        <div class="form-group">
+                            {{ add_admin_form.email_address.label(class="form-control-label") }}
+                            {% if add_admin_form.email_address.errors %}
+                                {{ add_admin_form.email_address(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in add_admin_form.email_address.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ add_admin_form.email_address(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group mt-3 mb-3">
+                            {{ add_admin_form.submit(class="btn btn-outline-info") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
+
 {% endblock content %}

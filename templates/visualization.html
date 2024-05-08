@@ -1,38 +1,46 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <head>
-        <script src="https://cdn.anychart.com/releases/8.11.1/js/anychart-base.min.js" type="text/javascript"></script>
-        <script src="https://cdn.anychart.com/releases/8.11.1/js/anychart-graph.min.js"></script>
-        <script src="{{url_for('static', filename='visualization.js')}}"></script>
-    </head>
 
-    <body>
-    <h1 class="border-bottom">Visualization</h1>
+<head>
+    <title>{{ entity_type }} Information</title>
+    <script src="https://cdn.anychart.com/releases/8.11.1/js/anychart-base.min.js" type="text/javascript"></script>
+    <script src="https://cdn.anychart.com/releases/8.11.1/js/anychart-graph.min.js"></script>
+    <script src="{{ url_for('static', filename='visualization.js') }}"></script>
+</head>
 
-    <div class="row">
-
-        <div class="col-lg-4">
-            <div class="justify-content-left" style="font-size:1.4em;overflow-y: auto;height:32em">
+<body>
+    <div class="container-fluid">
+        <h1 class="border-bottom">{{ entity_type }} Information</h1>
+        <div class="row">
+            <div class="col-md-4" style="font-size:1.4em; overflow-y: auto; height: 32em;">
                 <div class="pb-5">
-                Employer:   {{ employer.employer_name }} </br>
-                Address: {{ employer.headquarters_address }} </br>
-                Start Date: {{ employer.start_date.strftime("%Y-%m-%d") }} </br>
-                End Date: {{ end_time }} </br>
+                    {% if entity_type == 'Employer' %}
+                    {{ entity_type }}: {{ entity.employer_name }} </br>
+                    Address: {{ entity.headquarters_address }} </br>
+                    Start Date: {{ entity.start_date.strftime("%Y-%m-%d") }} </br>
+                    End Date: {{ entity.end_date.strftime("%Y-%m-%d") if entity.end_date else 'Active Company' }} </br>
+                    {% elif entity_type == 'Employee' %}
+                    {{ entity_type }}: {{ entity.first_name }} {{ entity.last_name }}</br>
+                    Email: {{ entity.email }} </br>
+                    Phone Number: {{ entity.phone_number }} </br>
+                    {% elif entity_type == 'Institution' %}
+                    {{ entity_type }}: {{ entity.institution_name }}
+                    Location: {{ entity.location }} </br>
+                    {% endif %}
+                    {% if entity.description %}
+                    Description: {{ entity.description }}
+                    {% endif %}
                 </div>
-                {% if employer.description != "" %}
-                Description: {{ employer.description }}
-                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <div id="chart_container_{{ entity_type|lower }}" class="w-100 h-100" style="background-color: #eee;"></div>
+                <!-- Script for creating the chart -->
+                <script>createChart({{ data|tojson }}, 'chart_container_{{ entity_type|lower }}');</script>
+                <!-- End of script for creating the chart -->
             </div>
         </div>
-
-        <div class="col-lg-8">
-            <div class="d-flex justify-content-center" style="height:45em">
-            <div id="chart_container" class="w-100 p-3" style="background-color: #eee;"></div>
-            </div>
-            <script>createChart({{data|tojson}})</script>
-        </div>
-
     </div>
-    </body>
+</body>
 
 {% endblock content %}
+
