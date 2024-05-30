@@ -1,18 +1,23 @@
-{% extends 'layout.html' %}
+{% extends 'layout.html' %} <!-- Extend the base layout template -->
 
-{% block content %}
-    <h1 class="border-bottom mb-4">All Employees</h1>
+{% block content %} <!-- Define a block of content to be inserted into the base layout -->
+    <h1 class="border-bottom mb-4">All Employees</h1> <!-- Page header with a bottom border and margin -->
+
+    <!-- Container with fixed height and vertical scroll -->
     <div class="container" style="height: 80vh; overflow-y: auto;" data-spy="scroll">
+        <!-- Employee table with hover effect -->
         <table id="employee_table" class="table table-hover">
             <thead>
                 <tr>
-                    <th onclick="sortTable(0)" scope="col"><a href="#" class="text-dark" >Last Name</a></th>
-                    <th scope="col"><a href="#" class="text-dark" >First Name</a></th>
-                    <th scope="col"><a href="#" class="text-dark" >Email</a></th>
-                    <th scope="col"><a href="#" class="text-dark" >Phone Number</a></th>
+                    <!-- Table headers with sorting functionality -->
+                    <th onclick="sortTable(0)" scope="col"><a href="#" class="text-dark">Last Name</a></th>
+                    <th scope="col"><a href="#" class="text-dark">First Name</a></th>
+                    <th scope="col"><a href="#" class="text-dark">Email</a></th>
+                    <th scope="col"><a href="#" class="text-dark">Phone Number</a></th>
                 </tr>
             </thead>
             <tbody>
+                <!-- Loop through all employees and create a table row for each -->
                 {% for employee in all_employees %}
                     <tr>
                         <td><a class="text-dark" href="{{ url_for('visualization', root_node=employee.last_name) }}">{{ employee.last_name }}</a></td>
@@ -25,22 +30,29 @@
         </table>
     </div>
 
+    <!-- JavaScript function to sort the table by the clicked column -->
     <script>
         function sortTable(n) {
           var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
           table = document.getElementById("employee_table");
           switching = true;
-          dir = "asc";
+          dir = "asc"; // Set the sorting direction to ascending
+
+          // Loop until no switching is needed
           while (switching) {
             switching = false;
             rows = table.rows;
+
+            // Loop through all table rows except the header
             for (i = 1; i < (rows.length - 1); i++) {
               shouldSwitch = false;
               x = rows[i].getElementsByTagName("TD")[n];
               y = rows[i + 1].getElementsByTagName("TD")[n];
+
+              // Compare two rows based on the current direction
               if (dir == "asc") {
                 if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                  shouldSwitch= true;
+                  shouldSwitch = true;
                   break;
                 }
               } else if (dir == "desc") {
@@ -50,11 +62,14 @@
                 }
               }
             }
+
             if (shouldSwitch) {
+              // Perform the switch and mark that a switch has been done
               rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
               switching = true;
-              switchcount ++;
+              switchcount++;
             } else {
+              // If no switching has been done and the direction is "asc", switch to "desc"
               if (switchcount == 0 && dir == "asc") {
                 dir = "desc";
                 switching = true;
@@ -63,4 +78,4 @@
           }
         }
     </script>
-{% endblock %}
+{% endblock %} <!-- End of content block -->
