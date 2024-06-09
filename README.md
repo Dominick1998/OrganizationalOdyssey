@@ -17,7 +17,8 @@ Organizational Odyssey is a Flask-based web application designed to streamline t
 Here are some screenshots of the project:
 
 <img src="Screenshots/img2.png" width="300"> <br>
-<img src="Screenshots/img1.png" width="300">
+<img src="Screenshots/img1.png" width="300"> <br>
+<img src="Screenshots/img3.png" width="300">
 
 ## Getting Started
 
