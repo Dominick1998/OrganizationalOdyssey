@@ -4,7 +4,7 @@
 
 ## Overview
 
-Organizational Odyssey is a Flask-based web application designed to streamline the management and visualization of organizational data, specifically focusing on the relationships between employees, departments, and locations. This project aims to provide a comprehensive solution for businesses to efficiently handle their internal structure data, enhancing decision-making processes through intuitive data visualization and management tools.
+Organizational Odyssey is a Flask-based web application designed to streamline the management and visualization of organizational data, specifically focusing on the relationships between employees/employers, departments, and locations. This project aims to provide a comprehensive solution for businesses to efficiently handle their internal structure data, enhancing decision-making processes through intuitive data visualization and management tools.
 
 ## Features
 
